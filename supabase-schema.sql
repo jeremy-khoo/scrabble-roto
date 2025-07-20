@@ -17,10 +17,11 @@ CREATE TABLE rating_bands (
     id SERIAL PRIMARY KEY,
     event_id INTEGER REFERENCES events(id) ON DELETE CASCADE,
     name VARCHAR(50) NOT NULL,
+    division INTEGER NOT NULL, -- 1 or 2
     min_rating INTEGER NOT NULL,
     max_rating INTEGER NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(event_id, name)
+    UNIQUE(event_id, division, name)
 );
 
 -- Players table (per event)
@@ -30,6 +31,8 @@ CREATE TABLE players (
     name VARCHAR(100) NOT NULL,
     current_rating INTEGER NOT NULL,
     original_rating INTEGER NOT NULL, -- Rating when first added to event
+    current_division INTEGER NOT NULL, -- 1 or 2
+    original_division INTEGER NOT NULL, -- Division when first added to event
     current_rating_band_id INTEGER REFERENCES rating_bands(id),
     original_rating_band_id INTEGER REFERENCES rating_bands(id), -- Band when first added
     external_id VARCHAR(100), -- ID from external API
@@ -58,6 +61,8 @@ CREATE TABLE team_players (
     team_id INTEGER REFERENCES teams(id) ON DELETE CASCADE,
     player_id INTEGER REFERENCES players(id),
     rating_band_id INTEGER REFERENCES rating_bands(id), -- Band they were drafted in
+    drafted_rating INTEGER, -- Player's rating when drafted (populated by trigger)
+    drafted_division INTEGER, -- Player's division when drafted (populated by trigger)
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(team_id, rating_band_id) -- One player per rating band per team
 );
@@ -77,16 +82,16 @@ INSERT INTO events (name, description, start_date, end_date) VALUES
     ('NASPA Scrabble Players Championship 2025', 'National Scrabble Championship 2025', '2025-08-09', '2025-08-14');
 
 -- Get the event ID for rating bands (adjust based on actual event)
-INSERT INTO rating_bands (event_id, name, min_rating, max_rating) VALUES
-    (1, 'Division 1 - GOAT', 2150, 9999),
-    (1, 'Division 1 - 2050+', 2050, 2149),
-    (1, 'Division 1 - 1950-2050', 1950, 2049),
-    (1, 'Division 1 - 1850-1950', 1850, 1949),
-    (1, 'Division 1 - < 1850', 1, 1849),
-    (1, 'Division 2 - 1700+', 1700, 1799),
-    (1, 'Division 2 - 1600-1700', 1600, 1699),
-    (1, 'Division 2 - 1500-1600', 1500, 1599),
-    (1, 'Division 2 - < 1500', 1, 1499);
+INSERT INTO rating_bands (event_id, division, name, min_rating, max_rating) VALUES
+    (1, 1, 'Division 1 - GOAT', 2150, 9999),
+    (1, 1, 'Division 1 - 2050+', 2050, 2149),
+    (1, 1, 'Division 1 - 1950-2050', 1950, 2049),
+    (1, 1, 'Division 1 - 1850-1950', 1850, 1949),
+    (1, 1, 'Division 1 - < 1850', 1, 1849),
+    (1, 2, 'Division 2 - 1700+', 1700, 1799),
+    (1, 2, 'Division 2 - 1600-1700', 1600, 1699),
+    (1, 2, 'Division 2 - 1500-1600', 1500, 1599),
+    (1, 2, 'Division 2 - < 1500', 1, 1499);
 
 
 -- Enable Row Level Security
@@ -159,8 +164,8 @@ CREATE VIEW public_profiles AS
 SELECT id, username, created_at
 FROM profiles;
 
--- Function to determine rating band for a given rating and event
-CREATE OR REPLACE FUNCTION get_rating_band(p_rating INTEGER, p_event_id INTEGER)
+-- Function to determine rating band for a given rating, division and event
+CREATE OR REPLACE FUNCTION get_rating_band(p_rating INTEGER, p_division INTEGER, p_event_id INTEGER)
 RETURNS INTEGER AS $$
 DECLARE
     band_id INTEGER;
@@ -168,6 +173,7 @@ BEGIN
     SELECT id INTO band_id
     FROM rating_bands
     WHERE event_id = p_event_id
+      AND division = p_division
       AND p_rating >= min_rating
       AND p_rating <= max_rating
     LIMIT 1;
@@ -182,8 +188,8 @@ RETURNS TRIGGER AS $$
 DECLARE
     new_band_id INTEGER;
 BEGIN
-    -- Calculate new rating band
-    new_band_id := get_rating_band(NEW.current_rating, NEW.event_id);
+    -- Calculate new rating band using division + rating
+    new_band_id := get_rating_band(NEW.current_rating, NEW.current_division, NEW.event_id);
 
     -- Update current rating band
     NEW.current_rating_band_id := new_band_id;
@@ -192,13 +198,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Function to update team validity when players change rating bands
+-- Function to update team validity when players change from their original state
 CREATE OR REPLACE FUNCTION update_team_validity()
 RETURNS TRIGGER AS $$
 BEGIN
     -- Mark teams invalid if they contain players who:
     -- 1. Dropped out, OR
-    -- 2. Changed rating bands (current_rating_band_id != original_rating_band_id)
+    -- 2. Changed rating or division from their ORIGINAL state (when first added to event)
+    --    AND the team drafted them under the original conditions
     UPDATE teams
     SET is_valid = false
     WHERE id IN (
@@ -206,7 +213,13 @@ BEGIN
         FROM team_players tp
         JOIN players p ON tp.player_id = p.id
         WHERE p.dropped_out = true
-           OR p.current_rating_band_id != p.original_rating_band_id
+           OR (
+               -- Player's original stats have changed since they were first added
+               (p.original_rating != p.current_rating OR p.original_division != p.current_division)
+               AND 
+               -- Team drafted them based on the original conditions
+               (tp.drafted_rating = p.original_rating AND tp.drafted_division = p.original_division)
+           )
     );
 
     RETURN NEW;
@@ -217,7 +230,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER update_rating_band_trigger
     BEFORE UPDATE ON players
     FOR EACH ROW
-    WHEN (OLD.current_rating IS DISTINCT FROM NEW.current_rating)
+    WHEN (OLD.current_rating IS DISTINCT FROM NEW.current_rating OR OLD.current_division IS DISTINCT FROM NEW.current_division)
     EXECUTE FUNCTION update_player_rating_band();
 
 CREATE TRIGGER player_change_trigger
@@ -229,9 +242,10 @@ CREATE TRIGGER player_change_trigger
 CREATE OR REPLACE FUNCTION set_original_rating_band()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.original_rating_band_id := get_rating_band(NEW.current_rating, NEW.event_id);
+    NEW.original_rating_band_id := get_rating_band(NEW.current_rating, NEW.current_division, NEW.event_id);
     NEW.current_rating_band_id := NEW.original_rating_band_id;
     NEW.original_rating := NEW.current_rating;
+    NEW.original_division := NEW.current_division;
 
     RETURN NEW;
 END;
@@ -241,6 +255,25 @@ CREATE TRIGGER set_original_rating_band_trigger
     BEFORE INSERT ON players
     FOR EACH ROW
     EXECUTE FUNCTION set_original_rating_band();
+
+-- Function to populate drafted snapshot data when team_players are created
+CREATE OR REPLACE FUNCTION set_drafted_snapshot()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Populate drafted_rating and drafted_division from current player state
+    SELECT current_rating, current_division 
+    INTO NEW.drafted_rating, NEW.drafted_division
+    FROM players 
+    WHERE id = NEW.player_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_drafted_snapshot_trigger
+    BEFORE INSERT ON team_players
+    FOR EACH ROW
+    EXECUTE FUNCTION set_drafted_snapshot();
 
 -- Function to automatically create profile when user signs up
   CREATE OR REPLACE FUNCTION public.handle_new_user()

@@ -35,12 +35,12 @@ title = 'Create Team'
 
     document
       .getElementById("eventSelect")
-      .addEventListener("change", function() {
+      .addEventListener("change", function () {
         loadRatingBands();
         updateSubmitButton();
       });
     document.getElementById("teamForm").addEventListener("submit", createTeam);
-    
+
     // Initially disable submit button
     updateSubmitButton();
   });
@@ -106,7 +106,7 @@ title = 'Create Team'
         .eq("current_rating_band_id", band.id)
         .eq("is_active", true)
         .eq("dropped_out", false)
-        .order("name");
+        .order("current_rating", { ascending: false });
 
       if (error) {
         console.error("Error loading players for band:", band.name, error);
@@ -128,44 +128,49 @@ title = 'Create Team'
                   .join("")}
             </select>
         `;
-      
+
       // Add change listener for visual feedback
-      const select = div.querySelector('select');
-      select.addEventListener('change', function() {
+      const select = div.querySelector("select");
+      select.addEventListener("change", function () {
         updateBandStatus(div, this.value);
         updateSubmitButton();
       });
-      
+
       container.appendChild(div);
     }
-    
+
     // Initially disable submit button
     updateSubmitButton();
   }
 
   function updateBandStatus(bandDiv, selectedValue) {
     if (selectedValue) {
-      bandDiv.classList.remove('invalid');
-      bandDiv.classList.add('completed');
+      bandDiv.classList.remove("invalid");
+      bandDiv.classList.add("completed");
     } else {
-      bandDiv.classList.remove('completed');
-      bandDiv.classList.remove('invalid');
+      bandDiv.classList.remove("completed");
+      bandDiv.classList.remove("invalid");
     }
   }
 
   function updateSubmitButton() {
     const submitButton = document.querySelector('button[type="submit"]');
-    const allSelects = document.querySelectorAll('.rating-band-selection select');
-    const allSelected = Array.from(allSelects).every(select => select.value !== '');
-    
+    const allSelects = document.querySelectorAll(
+      ".rating-band-selection select"
+    );
+    const allSelected = Array.from(allSelects).every(
+      (select) => select.value !== ""
+    );
+
     if (allSelected && allSelects.length > 0) {
       submitButton.disabled = false;
-      submitButton.textContent = 'Create Team';
-      submitButton.style.opacity = '1';
+      submitButton.textContent = "Create Team";
+      submitButton.style.opacity = "1";
     } else {
       submitButton.disabled = true;
-      submitButton.textContent = allSelects.length === 0 ? 'Select an event first' : 'Select all players';
-      submitButton.style.opacity = '0.6';
+      submitButton.textContent =
+        allSelects.length === 0 ? "Select an event first" : "Create team!";
+      submitButton.style.opacity = "0.6";
     }
   }
 
@@ -186,14 +191,15 @@ title = 'Create Team'
     let hasInvalidSelections = false;
 
     for (const select of playerSelects) {
-      const bandDiv = select.closest('.rating-band-selection');
-      
+      const bandDiv = select.closest(".rating-band-selection");
+
       if (!select.value) {
-        bandDiv.classList.add('invalid');
+        bandDiv.classList.add("invalid");
         hasInvalidSelections = true;
       } else {
-        bandDiv.classList.remove('invalid');
+        bandDiv.classList.remove("invalid");
         const bandId = select.name.split("-")[1];
+
         selectedPlayers.push({
           playerId: parseInt(select.value),
           ratingBandId: parseInt(bandId),
@@ -204,7 +210,7 @@ title = 'Create Team'
     if (hasInvalidSelections) {
       errorDiv.textContent = "Please select a player for each rating band";
       errorDiv.style.display = "block";
-      errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      errorDiv.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
@@ -227,13 +233,18 @@ title = 'Create Team'
 
       if (teamError) {
         // Handle unique constraint violation
-        if (teamError.code === '23505' && teamError.message.includes('teams_event_id_name_key')) {
-          throw new Error(`A team named "${teamName}" already exists for this event. Please choose a different name.`);
+        if (
+          teamError.code === "23505" &&
+          teamError.message.includes("teams_event_id_name_key")
+        ) {
+          throw new Error(
+            `A team named "${teamName}" already exists for this event. Please choose a different name.`
+          );
         }
         throw teamError;
       }
 
-      // Add players to team
+      // Add players to team - backend will populate drafted_rating/drafted_division from current player state
       const teamPlayers = selectedPlayers.map((sp) => ({
         team_id: team.id,
         player_id: sp.playerId,
