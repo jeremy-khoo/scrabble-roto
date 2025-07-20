@@ -5,38 +5,38 @@ title = 'Scrabble Roto'
 theme = 'PaperMod'
 
 [params]
-  env = "development"
-  description = "Fantasy Scrabble tournament app"
-  author = "Scrabble Roto"
-  showReadingTime = false
-  showShareButtons = false
-  showPostNavLinks = false
-  
+env = "development"
+description = "Fantasy Scrabble tournament app"
+author = "Scrabble Roto"
+showReadingTime = false
+showShareButtons = false
+showPostNavLinks = false
+
 [params.homeInfoParams]
-  Title = "Scrabble Roto"
-  Content = "Create your fantasy Scrabble team for nationals"
+Title = "Scrabble Roto"
+Content = "Create your fantasy Scrabble team for nationals! Click login above to register, then you can see existing teams or create new teams. After creating a team, please send $20 to Joey K via PayPal."
 
 [[menu.main]]
-  name = "Teams"
-  url = "/teams/"
-  weight = 10
+name = "Teams"
+url = "/teams/"
+weight = 10
 
 [[menu.main]]
-  name = "Create Team"
-  url = "/create-team/"
-  weight = 20
+name = "Create Team"
+url = "/create-team/"
+weight = 20
 
 [[menu.main]]
-  name = "Admin"
-  url = "/admin/"
-  weight = 25
+name = "Admin"
+url = "/admin/"
+weight = 25
 
 [[menu.main]]
-  name = "Login"
-  url = "/login/"
-  weight = 30
+name = "Login"
+url = "/login/"
+weight = 30
 
 [markup]
-  [markup.goldmark]
-    [markup.goldmark.renderer]
-      unsafe = true
+[markup.goldmark]
+[markup.goldmark.renderer]
+unsafe = true

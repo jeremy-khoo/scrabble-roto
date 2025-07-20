@@ -54,114 +54,103 @@ async function updateAuthUI(isAuthenticated) {
   if (isUpdatingAuth) return;
   isUpdatingAuth = true;
   
-  // Try multiple selectors for the login link
-  let loginLink = document.querySelector('a[href="/login/"]') || 
-                  document.querySelector('a[href*="login"]') ||
-                  Array.from(document.querySelectorAll('a')).find(a => a.textContent.trim() === 'Login' || a.textContent.includes('Logged in as'));
-  
-  // If login link not found and DOM isn't ready, wait a tiny bit
-  if (!loginLink && document.readyState !== 'complete') {
-    await new Promise(resolve => setTimeout(resolve, 50));
-    loginLink = document.querySelector('a[href="/login/"]') || 
-                document.querySelector('a[href*="login"]') ||
-                Array.from(document.querySelectorAll('a')).find(a => a.textContent.trim() === 'Login' || a.textContent.includes('Logged in as'));
-  }
-  
-  const createTeamLink = document.querySelector('a[href="/create-team/"]') ||
-                        document.querySelector('a[href*="create-team"]');
-  const adminLink = document.querySelector('a[href="/admin/"]') ||
-                   document.querySelector('a[href*="admin"]');
-  
   console.log('updateAuthUI called, isAuthenticated:', isAuthenticated);
-  console.log('loginLink found:', loginLink);
   
-  // Clean up any existing logout buttons first
-  document.querySelectorAll('#logout-btn, [data-logout-btn]').forEach(btn => btn.remove());
-
-  if (isAuthenticated) {
-    // Get user profile for username
+  // Get elements using the new IDs from our custom header
+  const authUserInfo = document.getElementById('authUserInfo');
+  const authUserDisplay = document.getElementById('authUserDisplay');
+  const loginMenu = document.getElementById('menu-item-login');
+  const createTeamMenu = document.getElementById('menu-item-create-team');
+  const adminMenu = document.getElementById('menu-item-admin');
+  
+  console.log('Elements found:', {
+    authUserInfo: !!authUserInfo,
+    authUserDisplay: !!authUserDisplay,
+    loginMenu: !!loginMenu,
+    createTeamMenu: !!createTeamMenu,
+    adminMenu: !!adminMenu
+  });
+  
+  if (isAuthenticated && currentUser) {
     try {
+      // Get user profile for username and admin status
       const { data: profile } = await supabase
         .from("profiles")
         .select("username, is_admin")
         .eq("id", currentUser.id)
         .single();
 
-      // Update login link to show logged in status
-      if (loginLink) {
-        console.log('Updating login link text to:', `Logged in as ${profile?.username || currentUser.email}`);
-        loginLink.textContent = `Logged in as ${profile?.username || currentUser.email}`;
-        loginLink.href = "#";
-        loginLink.onclick = (e) => e.preventDefault(); // Make it non-clickable
-        loginLink.style.color = "#666";
-        loginLink.style.cursor = "default";
-      } else {
-        console.log('Login link not found!');
+      console.log('Profile loaded:', profile);
+
+      // Show user info
+      if (authUserInfo && authUserDisplay) {
+        authUserDisplay.textContent = `Logged in as ${profile?.username || currentUser.email}`;
+        authUserInfo.style.display = 'flex';
+        console.log('Set authUserInfo to display: flex');
       }
 
-      // Create logout button
-      if (loginLink) {
-        const logoutBtn = document.createElement('a');
-        logoutBtn.id = 'logout-btn';
-        logoutBtn.setAttribute('data-logout-btn', 'true');
-        logoutBtn.href = '#';
-        logoutBtn.textContent = 'Logout';
-        logoutBtn.onclick = (e) => {
-          e.preventDefault();
-          logout();
-        };
-        
-        // Insert logout button after login link
-        loginLink.parentNode.insertBefore(logoutBtn, loginLink.nextSibling);
+      // Hide login menu item
+      if (loginMenu) {
+        loginMenu.style.display = 'none';
+        console.log('Set loginMenu to display: none');
       }
 
-      // Show protected links
-      if (createTeamLink) {
-        createTeamLink.style.display = "block";
+      // Show create team menu
+      if (createTeamMenu) {
+        createTeamMenu.style.display = 'block';
+        console.log('Set createTeamMenu to display: block');
       }
 
-      // Show/hide admin link
-      if (adminLink) {
+      // Show/hide admin menu based on permissions
+      if (adminMenu) {
         if (profile?.is_admin) {
-          adminLink.style.display = "block";
+          adminMenu.style.display = 'block';
+          console.log('Set adminMenu to display: block (admin user)');
         } else {
-          adminLink.style.display = "none";
+          adminMenu.style.display = 'none';
+          console.log('Set adminMenu to display: none (not admin)');
         }
       }
+
     } catch (error) {
       console.error("Error loading profile:", error);
-      if (loginLink) {
-        loginLink.textContent = `Logged in as ${currentUser.email}`;
-        loginLink.href = "#";
-        loginLink.onclick = (e) => e.preventDefault();
-        loginLink.style.color = "#666";
-        loginLink.style.cursor = "default";
+      
+      // Fallback - show basic user info
+      if (authUserInfo && authUserDisplay) {
+        authUserDisplay.textContent = `Logged in as ${currentUser.email}`;
+        authUserInfo.style.display = 'flex';
       }
-      if (adminLink) adminLink.style.display = "none";
+      
+      if (loginMenu) loginMenu.style.display = 'none';
+      if (createTeamMenu) createTeamMenu.style.display = 'block';
+      if (adminMenu) adminMenu.style.display = 'none';
     }
   } else {
-    // Reset to login state
-    if (loginLink) {
-      loginLink.textContent = "Login";
-      loginLink.href = "/login/";
-      loginLink.onclick = null;
-      loginLink.style.color = "";
-      loginLink.style.cursor = "";
+    // User is logged out
+    console.log('Setting logged out state');
+    
+    // Hide user info
+    if (authUserInfo) {
+      authUserInfo.style.display = 'none';
+      console.log('Set authUserInfo to display: none');
     }
     
-    // Remove all logout buttons
-    document.querySelectorAll('#logout-btn, [data-logout-btn]').forEach(btn => btn.remove());
-
-    // Hide protected links only if we're certain user is not authenticated
-    // Add a small delay to prevent hiding links while user is trying to click
-    setTimeout(() => {
-      if (createTeamLink && currentUser === null) {
-        createTeamLink.style.display = "none";
-      }
-      if (adminLink && currentUser === null) {
-        adminLink.style.display = "none";
-      }
-    }, 100);
+    // Show login menu
+    if (loginMenu) {
+      loginMenu.style.display = 'block';
+      console.log('Set loginMenu to display: block');
+    }
+    
+    // Hide protected menus
+    if (createTeamMenu) {
+      createTeamMenu.style.display = 'none';
+      console.log('Set createTeamMenu to display: none');
+    }
+    
+    if (adminMenu) {
+      adminMenu.style.display = 'none';
+      console.log('Set adminMenu to display: none');
+    }
   }
   
   // Reset the flag
@@ -256,19 +245,30 @@ async function requireAuth() {
 
 // Initialize when DOM loads
 document.addEventListener("DOMContentLoaded", function() {
-  // Ensure menu links are visible by default before auth check
-  const createTeamLink = document.querySelector('a[href="/create-team/"]') ||
-                        document.querySelector('a[href*="create-team"]');
-  const adminLink = document.querySelector('a[href="/admin/"]') ||
-                   document.querySelector('a[href*="admin"]');
-  
-  if (createTeamLink) {
-    createTeamLink.style.display = "";
-  }
-  if (adminLink) {
-    adminLink.style.display = "";
-  }
-  
-  // Then check auth
-  initAuth();
+  // Wait a bit for all DOM elements to be ready
+  setTimeout(() => {
+    console.log('Initializing auth UI...');
+    
+    // Set initial states - everything starts hidden/visible appropriately
+    const authUserInfo = document.getElementById('authUserInfo');
+    const loginMenu = document.getElementById('menu-item-login');
+    const createTeamMenu = document.getElementById('menu-item-create-team');
+    const adminMenu = document.getElementById('menu-item-admin');
+    
+    console.log('Initial elements:', {
+      authUserInfo: !!authUserInfo,
+      loginMenu: !!loginMenu,
+      createTeamMenu: !!createTeamMenu,
+      adminMenu: !!adminMenu
+    });
+    
+    // Set default states
+    if (authUserInfo) authUserInfo.style.display = 'none';
+    if (loginMenu) loginMenu.style.display = 'block';
+    if (createTeamMenu) createTeamMenu.style.display = 'none';
+    if (adminMenu) adminMenu.style.display = 'none';
+    
+    // Then check auth
+    initAuth();
+  }, 100);
 });
