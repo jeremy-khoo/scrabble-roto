@@ -1,0 +1,590 @@
+/* Unified CSS for all pages - theme-aware styling */
+
+/* Global form styling */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: var(--content);
+}
+
+.form-group input, 
+.form-group select,
+.form-row input, 
+.form-row select {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.75rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: var(--theme);
+    color: var(--content);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-group input:focus, 
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.form-group select:hover,
+.form-row select:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Beautiful select dropdown styling */
+.form-group select,
+.rating-band-selection select {
+    background: linear-gradient(135deg, var(--theme) 0%, var(--code-bg) 100%);
+    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 40px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.form-group select option,
+.rating-band-selection select option {
+    padding: 0.75rem;
+    background-color: var(--theme);
+    color: var(--content);
+    border: none;
+}
+
+.form-group select option:hover,
+.rating-band-selection select option:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+/* Invalid state styling */
+.form-group select:invalid,
+.rating-band-selection select:invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+}
+
+.form-group select:invalid:focus,
+.rating-band-selection select:invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3);
+}
+
+/* Dark mode specific fixes */
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group select,
+[data-theme="dark"] .form-row input,
+[data-theme="dark"] .form-row select {
+    background-color: var(--code-bg);
+    border-color: var(--border);
+    color: var(--content);
+}
+
+[data-theme="dark"] .form-group input::placeholder {
+    color: var(--tertiary);
+}
+
+/* Container styling */
+#createTeamContainer {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+#adminContainer,
+#teamsContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Button styling - exclude theme toggle buttons */
+button:not([class*="theme"]):not([aria-label*="theme"]):not([title*="theme"]):not(.theme-toggle) {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0.5rem 0.25rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+button:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+button:disabled {
+    background: linear-gradient(135deg, #6c757d 0%, #545862 100%);
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Danger/Delete buttons */
+button.danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+}
+
+button.danger:hover {
+    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* Success/Create buttons */
+button.success,
+button[type="submit"] {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+button.success:hover,
+button[type="submit"]:hover {
+    background: linear-gradient(135deg, #1e7e34 0%, #155724 100%);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* Secondary buttons */
+button.secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #545862 100%);
+    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
+}
+
+button.secondary:hover {
+    background: linear-gradient(135deg, #545862 0%, #383d41 100%);
+    box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+/* Warning buttons */
+button.warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    color: #212529;
+    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.2);
+}
+
+button.warning:hover {
+    background: linear-gradient(135deg, #e0a800 0%, #d39e00 100%);
+    box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+}
+
+/* Admin specific button overrides */
+#adminContainer button {
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    margin: 0.25rem;
+}
+
+/* Load buttons */
+button[onclick*="load"],
+button[onclick*="Load"] {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    box-shadow: 0 2px 4px rgba(23, 162, 184, 0.2);
+}
+
+button[onclick*="load"]:hover,
+button[onclick*="Load"]:hover {
+    background: linear-gradient(135deg, #138496 0%, #0f6674 100%);
+    box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+}
+
+/* Edit buttons */
+button[onclick*="edit"],
+button[onclick*="Edit"] {
+    background: linear-gradient(135deg, #6f42c1 0%, #59359a 100%);
+    box-shadow: 0 2px 4px rgba(111, 66, 193, 0.2);
+}
+
+button[onclick*="edit"]:hover,
+button[onclick*="Edit"]:hover {
+    background: linear-gradient(135deg, #59359a 0%, #4c2c85 100%);
+    box-shadow: 0 4px 8px rgba(111, 66, 193, 0.3);
+}
+
+/* Toggle buttons (admin/user toggles) */
+button[onclick*="toggle"],
+button[onclick*="Toggle"] {
+    background: linear-gradient(135deg, #fd7e14 0%, #e8590c 100%);
+    box-shadow: 0 2px 4px rgba(253, 126, 20, 0.2);
+}
+
+button[onclick*="toggle"]:hover,
+button[onclick*="Toggle"]:hover {
+    background: linear-gradient(135deg, #e8590c 0%, #d54309 100%);
+    box-shadow: 0 4px 8px rgba(253, 126, 20, 0.3);
+}
+
+/* Card styling for teams */
+.team-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: var(--code-bg);
+}
+
+.team-card h3 {
+    margin-top: 0;
+    color: var(--content);
+}
+
+.team-card p {
+    color: var(--content);
+}
+
+.team-card ul {
+    margin: 0.5rem 0;
+}
+
+/* Badge styling */
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.badge.valid {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.badge.invalid {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Rating band selection styling */
+.rating-band-selection {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--theme) 0%, var(--code-bg) 100%);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.rating-band-selection:hover {
+    border-color: var(--primary);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.rating-band-selection.invalid {
+    border-color: #dc3545;
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, var(--code-bg) 100%);
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.rating-band-selection h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--content);
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rating-band-selection h3::before {
+    content: "🎯";
+    font-size: 1.1rem;
+}
+
+.rating-band-selection select {
+    margin-top: 0.75rem;
+    width: 100%;
+    max-width: none;
+    padding: 0.75rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: linear-gradient(135deg, var(--theme) 0%, var(--code-bg) 100%);
+    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 40px;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--content);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.rating-band-selection select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.rating-band-selection select:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.rating-band-selection.completed {
+    border-color: #28a745;
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, var(--code-bg) 100%);
+}
+
+.rating-band-selection.completed h3::before {
+    content: "✅";
+}
+
+/* Admin panel styling */
+.tab-btn {
+    background: linear-gradient(135deg, var(--theme) 0%, var(--code-bg) 100%);
+    border: 2px solid var(--border);
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--content);
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab-btn:hover {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border-color: #007bff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    color: white;
+    border-color: #28a745;
+    box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+}
+
+.tab-content {
+    display: none;
+    padding: 2rem 0;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.section {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--code-bg);
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.form-row input, .form-row select {
+    flex: 1;
+}
+
+.band-item, .player-item, .team-item, .user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    background-color: var(--theme);
+}
+
+.player-item.inactive, .team-item.invalid {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-color: rgba(220, 53, 69, 0.3);
+}
+
+.invalid-badge {
+    color: #e53e3e;
+    font-weight: bold;
+}
+
+/* Message styling */
+.success-message {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+}
+
+.error-message {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+}
+
+/* Fix dark mode toggle button globally - remove all outlines and borders */
+.theme-toggle,
+button[aria-label*="theme"],
+button[class*="theme"],
+#theme-toggle,
+.theme-switch,
+[data-theme-toggle],
+.header #theme-toggle,
+.header .theme-toggle,
+button[title*="Theme"],
+button[title*="theme"] {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0.5rem !important;
+    margin: 0 !important;
+    background-color: transparent !important;
+    border-radius: 0 !important;
+    vertical-align: middle !important;
+    align-self: center !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: auto !important;
+    line-height: 1 !important;
+}
+
+.theme-toggle:focus,
+button[aria-label*="theme"]:focus,
+button[class*="theme"]:focus,
+#theme-toggle:focus,
+.theme-switch:focus,
+[data-theme-toggle]:focus,
+.header #theme-toggle:focus,
+.header .theme-toggle:focus,
+button[title*="Theme"]:focus,
+button[title*="theme"]:focus {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    background-color: transparent !important;
+}
+
+.theme-toggle:hover,
+button[aria-label*="theme"]:hover,
+button[class*="theme"]:hover,
+#theme-toggle:hover,
+.theme-switch:hover,
+[data-theme-toggle]:hover,
+.header #theme-toggle:hover,
+.header .theme-toggle:hover,
+button[title*="Theme"]:hover,
+button[title*="theme"]:hover {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    background-color: transparent !important;
+}
+
+
+/* Fix header alignment for theme toggle */
+.header,
+.header-wrapper,
+nav,
+.navigation {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.header .menu,
+nav .menu,
+.navigation .menu {
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Ensure proper text colors in dark mode */
+[data-theme="dark"] {
+    color: var(--content);
+}
+
+[data-theme="dark"] .team-card,
+[data-theme="dark"] .section,
+[data-theme="dark"] .rating-band-selection {
+    background-color: var(--code-bg);
+    border-color: var(--border);
+}
+
+[data-theme="dark"] .band-item,
+[data-theme="dark"] .player-item,
+[data-theme="dark"] .team-item,
+[data-theme="dark"] .user-item {
+    background-color: var(--theme);
+    border-color: var(--border);
+    color: var(--content);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    #createTeamContainer,
+    #adminContainer,
+    #teamsContainer {
+        margin: 0 1rem;
+    }
+    
+    .form-group input, 
+    .form-group select {
+        max-width: 100%;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

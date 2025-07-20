@@ -1,0 +1,495 @@
++++
+date = '2025-07-19T21:01:46-04:00'
+draft = false
+title = 'Admin Panel'
++++
+
+<div id="adminContainer">
+    <div id="adminTabs">
+        <button class="tab-btn active" onclick="showTab('events')">Events & Rating Bands</button>
+        <button class="tab-btn" onclick="showTab('players')">Players</button>
+        <button class="tab-btn" onclick="showTab('teams')">Teams</button>
+        <button class="tab-btn" onclick="showTab('users')">Users</button>
+    </div>
+
+    <!-- Events & Rating Bands Tab -->
+    <div id="eventsTab" class="tab-content active">
+        <h2>Events Management</h2>
+        
+        <div class="section">
+            <h3>Create New Event</h3>
+            <form id="eventForm">
+                <div class="form-row">
+                    <input type="text" id="eventName" placeholder="Event Name" required>
+                    <input type="text" id="eventDescription" placeholder="Description">
+                </div>
+                <div class="form-row">
+                    <input type="date" id="eventStartDate">
+                    <input type="date" id="eventEndDate">
+                </div>
+                <button type="submit">Create Event</button>
+            </form>
+        </div>
+
+        <div class="section">
+            <h3>Rating Bands</h3>
+            <div class="form-row">
+                <select id="eventSelect">
+                    <option value="">Select Event...</option>
+                </select>
+                <button onclick="loadRatingBands()">Load Bands</button>
+            </div>
+            
+            <div id="ratingBandsContainer">
+                <p>Select an event to manage rating bands</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Players Tab -->
+    <div id="playersTab" class="tab-content">
+        <h2>Players Management</h2>
+        
+        <div class="section">
+            <h3>Add New Player</h3>
+            <form id="playerForm">
+                <div class="form-row">
+                    <select id="playerEventSelect" required>
+                        <option value="">Select Event...</option>
+                    </select>
+                    <input type="text" id="playerName" placeholder="Player Name" required>
+                </div>
+                <div class="form-row">
+                    <input type="number" id="playerRating" placeholder="Rating" required>
+                    <input type="text" id="playerExternalId" placeholder="External ID (optional)">
+                </div>
+                <button type="submit">Add Player</button>
+            </form>
+        </div>
+
+        <div class="section">
+            <h3>Existing Players</h3>
+            <div class="form-row">
+                <select id="playerEventFilter">
+                    <option value="">Select Event...</option>
+                </select>
+                <button onclick="loadPlayers()">Load Players</button>
+            </div>
+            <div id="playersContainer">
+                <p>Select an event to view players</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teams Tab -->
+    <div id="teamsTab" class="tab-content">
+        <h2>Teams Management</h2>
+        <div class="section">
+            <h3>All Teams</h3>
+            <button onclick="loadAllTeams()">Load All Teams</button>
+            <div id="adminTeamsContainer">
+                <p>Click "Load All Teams" to view</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Tab -->
+    <div id="usersTab" class="tab-content">
+        <h2>Users Management</h2>
+        <div class="section">
+            <h3>All Users</h3>
+            <button onclick="loadUsers()">Load Users</button>
+            <div id="usersContainer">
+                <p>Click "Load Users" to view</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="adminError" class="error-message" style="display: none;"></div>
+<div id="adminSuccess" class="success-message" style="display: none;"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    // Check if user is admin
+    if (!(await requireAuth())) {
+        return;
+    }
+    
+    checkAdminAccess();
+    loadEventsForSelects();
+    
+    // Form submissions
+    document.getElementById('eventForm').addEventListener('submit', createEvent);
+    document.getElementById('playerForm').addEventListener('submit', createPlayer);
+});
+
+async function checkAdminAccess() {
+    try {
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', currentUser.id)
+            .single();
+            
+        if (error || !profile?.is_admin) {
+            document.getElementById('adminContainer').innerHTML = 
+                '<h2>Access Denied</h2><p>You do not have admin privileges.</p>';
+            return;
+        }
+    } catch (error) {
+        console.error('Error checking admin access:', error);
+        document.getElementById('adminContainer').innerHTML = 
+            '<h2>Error</h2><p>Could not verify admin access.</p>';
+    }
+}
+
+function showTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById(tabName + 'Tab').classList.add('active');
+    event.target.classList.add('active');
+}
+
+async function loadEventsForSelects() {
+    try {
+        const { data: events, error } = await supabase
+            .from('events')
+            .select('*')
+            .order('created_at', { ascending: false });
+            
+        if (error) throw error;
+        
+        const selects = ['eventSelect', 'playerEventSelect', 'playerEventFilter'];
+        selects.forEach(selectId => {
+            const select = document.getElementById(selectId);
+            // Clear existing options except first
+            select.innerHTML = select.innerHTML.split('</option>')[0] + '</option>';
+            
+            events.forEach(event => {
+                const option = document.createElement('option');
+                option.value = event.id;
+                option.textContent = event.name;
+                select.appendChild(option);
+            });
+        });
+    } catch (error) {
+        showError('Error loading events: ' + error.message);
+    }
+}
+
+async function createEvent(e) {
+    e.preventDefault();
+    
+    const eventData = {
+        name: document.getElementById('eventName').value,
+        description: document.getElementById('eventDescription').value,
+        start_date: document.getElementById('eventStartDate').value || null,
+        end_date: document.getElementById('eventEndDate').value || null
+    };
+    
+    try {
+        const { error } = await supabase
+            .from('events')
+            .insert([eventData]);
+            
+        if (error) throw error;
+        
+        showSuccess('Event created successfully!');
+        document.getElementById('eventForm').reset();
+        loadEventsForSelects();
+    } catch (error) {
+        showError('Error creating event: ' + error.message);
+    }
+}
+
+async function loadRatingBands() {
+    const eventId = document.getElementById('eventSelect').value;
+    if (!eventId) return;
+    
+    try {
+        const { data: bands, error } = await supabase
+            .from('rating_bands')
+            .select('*')
+            .eq('event_id', eventId)
+            .order('min_rating', { ascending: false });
+            
+        if (error) throw error;
+        
+        const container = document.getElementById('ratingBandsContainer');
+        container.innerHTML = `
+            <h4>Rating Bands for Selected Event</h4>
+            <form id="bandForm">
+                <div class="form-row">
+                    <input type="text" id="bandName" placeholder="Band Name" required>
+                    <input type="number" id="bandMinRating" placeholder="Min Rating" required>
+                    <input type="number" id="bandMaxRating" placeholder="Max Rating" required>
+                    <button type="submit">Add Band</button>
+                </div>
+            </form>
+            <div class="bands-list">
+                ${bands.map(band => `
+                    <div class="band-item">
+                        <span>${band.name}: ${band.min_rating}-${band.max_rating}</span>
+                        <button onclick="deleteBand(${band.id})">Delete</button>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        
+        document.getElementById('bandForm').addEventListener('submit', createRatingBand);
+    } catch (error) {
+        showError('Error loading rating bands: ' + error.message);
+    }
+}
+
+async function createRatingBand(e) {
+    e.preventDefault();
+    
+    const eventId = document.getElementById('eventSelect').value;
+    const bandData = {
+        event_id: eventId,
+        name: document.getElementById('bandName').value,
+        min_rating: parseInt(document.getElementById('bandMinRating').value),
+        max_rating: parseInt(document.getElementById('bandMaxRating').value)
+    };
+    
+    try {
+        const { error } = await supabase
+            .from('rating_bands')
+            .insert([bandData]);
+            
+        if (error) throw error;
+        
+        showSuccess('Rating band created successfully!');
+        loadRatingBands(); // Reload the bands
+    } catch (error) {
+        showError('Error creating rating band: ' + error.message);
+    }
+}
+
+async function deleteBand(bandId) {
+    if (!confirm('Are you sure? This will affect teams using this rating band.')) return;
+    
+    try {
+        const { error } = await supabase
+            .from('rating_bands')
+            .delete()
+            .eq('id', bandId);
+            
+        if (error) throw error;
+        
+        showSuccess('Rating band deleted successfully!');
+        loadRatingBands();
+    } catch (error) {
+        showError('Error deleting rating band: ' + error.message);
+    }
+}
+
+async function createPlayer(e) {
+    e.preventDefault();
+    
+    const playerData = {
+        event_id: document.getElementById('playerEventSelect').value,
+        name: document.getElementById('playerName').value,
+        current_rating: parseInt(document.getElementById('playerRating').value),
+        external_id: document.getElementById('playerExternalId').value || null
+    };
+    
+    try {
+        const { error } = await supabase
+            .from('players')
+            .insert([playerData]);
+            
+        if (error) throw error;
+        
+        showSuccess('Player added successfully!');
+        document.getElementById('playerForm').reset();
+    } catch (error) {
+        showError('Error adding player: ' + error.message);
+    }
+}
+
+async function loadPlayers() {
+    const eventId = document.getElementById('playerEventFilter').value;
+    if (!eventId) return;
+    
+    try {
+        const { data: players, error } = await supabase
+            .from('players')
+            .select(`
+                *,
+                rating_bands:current_rating_band_id(name)
+            `)
+            .eq('event_id', eventId)
+            .order('name');
+            
+        if (error) throw error;
+        
+        const container = document.getElementById('playersContainer');
+        container.innerHTML = `
+            <div class="players-list">
+                ${players.map(player => `
+                    <div class="player-item ${!player.is_active ? 'inactive' : ''}">
+                        <div class="player-info">
+                            <strong>${player.name}</strong> - ${player.current_rating} 
+                            (${player.rating_bands?.name || 'No band'})
+                            ${player.dropped_out ? ' - DROPPED' : ''}
+                            ${!player.is_active ? ' - INACTIVE' : ''}
+                        </div>
+                        <div class="player-actions">
+                            <button onclick="editPlayer(${player.id})">Edit</button>
+                            <button onclick="deletePlayer(${player.id})" class="danger">Delete</button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch (error) {
+        showError('Error loading players: ' + error.message);
+    }
+}
+
+async function deletePlayer(playerId) {
+    if (!confirm('Are you sure? This will invalidate teams with this player.')) return;
+    
+    try {
+        const { error } = await supabase
+            .from('players')
+            .delete()
+            .eq('id', playerId);
+            
+        if (error) throw error;
+        
+        showSuccess('Player deleted successfully!');
+        loadPlayers();
+    } catch (error) {
+        showError('Error deleting player: ' + error.message);
+    }
+}
+
+async function loadAllTeams() {
+    try {
+        const { data: teams, error } = await supabase
+            .from('teams')
+            .select(`
+                *,
+                profiles:user_id(username, email),
+                events(name)
+            `)
+            .order('created_at', { ascending: false });
+            
+        if (error) throw error;
+        
+        const container = document.getElementById('adminTeamsContainer');
+        container.innerHTML = `
+            <div class="teams-list">
+                ${teams.map(team => `
+                    <div class="team-item ${!team.is_valid ? 'invalid' : ''}">
+                        <div class="team-info">
+                            <strong>${team.name}</strong> by ${team.profiles?.username || 'Unknown'}
+                            <br><small>Event: ${team.events?.name || 'Unknown'}</small>
+                            <br><small>Email: ${team.profiles?.email || 'Unknown'}</small>
+                            ${!team.is_valid ? '<br><span class="invalid-badge">INVALID</span>' : ''}
+                        </div>
+                        <div class="team-actions">
+                            <button onclick="deleteTeam(${team.id})" class="danger">Delete Team</button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch (error) {
+        showError('Error loading teams: ' + error.message);
+    }
+}
+
+async function deleteTeam(teamId) {
+    if (!confirm('Are you sure you want to delete this team?')) return;
+    
+    try {
+        const { error } = await supabase
+            .from('teams')
+            .delete()
+            .eq('id', teamId);
+            
+        if (error) throw error;
+        
+        showSuccess('Team deleted successfully!');
+        loadAllTeams();
+    } catch (error) {
+        showError('Error deleting team: ' + error.message);
+    }
+}
+
+async function loadUsers() {
+    try {
+        const { data: users, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .order('created_at', { ascending: false });
+            
+        if (error) throw error;
+        
+        const container = document.getElementById('usersContainer');
+        container.innerHTML = `
+            <div class="users-list">
+                ${users.map(user => `
+                    <div class="user-item">
+                        <div class="user-info">
+                            <strong>${user.username || 'No username'}</strong>
+                            <br>Email: ${user.email || 'No email'}
+                            <br>Admin: ${user.is_admin ? 'Yes' : 'No'}
+                            <br><small>Joined: ${new Date(user.created_at).toLocaleDateString()}</small>
+                        </div>
+                        <div class="user-actions">
+                            <button onclick="toggleAdmin('${user.id}', ${!user.is_admin})">
+                                ${user.is_admin ? 'Remove Admin' : 'Make Admin'}
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch (error) {
+        showError('Error loading users: ' + error.message);
+    }
+}
+
+async function toggleAdmin(userId, makeAdmin) {
+    try {
+        const { error } = await supabase
+            .from('profiles')
+            .update({ is_admin: makeAdmin })
+            .eq('id', userId);
+            
+        if (error) throw error;
+        
+        showSuccess(`User ${makeAdmin ? 'promoted to' : 'removed from'} admin successfully!`);
+        loadUsers();
+    } catch (error) {
+        showError('Error updating user: ' + error.message);
+    }
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('adminError');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    setTimeout(() => errorDiv.style.display = 'none', 5000);
+}
+
+function showSuccess(message) {
+    const successDiv = document.getElementById('adminSuccess');
+    successDiv.textContent = message;
+    successDiv.style.display = 'block';
+    setTimeout(() => successDiv.style.display = 'none', 3000);
+}
+</script>

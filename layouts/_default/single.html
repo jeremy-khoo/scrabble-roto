@@ -1,0 +1,39 @@
+{{- define "main" }}
+
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">
+      {{ .Title }}
+      {{- if .Draft }}<sup><span class="entry-isdraft">&nbsp;&nbsp;[draft]</span></sup>{{- end }}
+    </h1>
+  </header>
+  {{- if not (.Param "hideMeta") }}
+  <div class="post-meta">
+    {{- partial "post_meta.html" . -}}
+    {{- partial "translation_list.html" . -}}
+    {{- partial "edit_post.html" . -}}
+  </div>
+  {{- end }}
+
+  {{- $isHidden := .Params.cover.hidden | default .Site.Params.cover.hiddenInSingle | default .Site.Params.cover.hidden }}
+  {{- partial "cover.html" (dict "cxt" . "IsHome" false "isHidden" $isHidden) }}
+
+  <div class="post-content">
+    {{- if not (.Param "disableAnchoredHeadings") }}
+    {{- partial "anchored_headings.html" .Content -}}
+    {{- else }}{{ .Content }}{{ end }}
+  </div>
+
+  <footer class="post-footer">
+    {{- $tags := .GetTerms "tags" }}
+    {{- if $tags }}
+    <ul class="post-tags">
+      {{- range $tags }}
+      <li><a href="{{ .Permalink }}">{{ .LinkTitle }}</a></li>
+      {{- end }}
+    </ul>
+    {{- end }}
+  </footer>
+</article>
+
+{{- end }}{{/* end main */}}

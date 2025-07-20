@@ -1,0 +1,260 @@
++++
+date = '2025-07-19T18:47:33-04:00'
+draft = false
+title = 'Create Team'
++++
+
+<h1>Create Your Team</h1>
+
+<div id="createTeamContainer">
+  <form id="teamForm">
+    <div class="form-group">
+      <label for="teamName">Team Name:</label>
+      <input type="text" id="teamName" required />
+    </div>
+
+    <div class="form-group">
+      <label for="eventSelect">Event:</label>
+      <select id="eventSelect" required>
+        <option value="">Select an event...</option>
+      </select>
+    </div>
+
+    <div id="playerSelections"></div>
+
+    <div id="teamError" class="error-message" style="display: none"></div>
+    <button type="submit">Create Team</button>
+  </form>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", async function () {
+    if (!(await requireAuth())) return;
+
+    loadEvents();
+
+    document
+      .getElementById("eventSelect")
+      .addEventListener("change", function() {
+        loadRatingBands();
+        updateSubmitButton();
+      });
+    document.getElementById("teamForm").addEventListener("submit", createTeam);
+    
+    // Initially disable submit button
+    updateSubmitButton();
+  });
+
+  async function loadEvents() {
+    try {
+      const { data: events, error } = await supabase
+        .from("events")
+        .select("*")
+        .eq("is_active", true)
+        .order("start_date", { ascending: false });
+
+      if (error) throw error;
+
+      const select = document.getElementById("eventSelect");
+      events.forEach((event, index) => {
+        const option = document.createElement("option");
+        option.value = event.id;
+        option.textContent = event.name;
+        select.appendChild(option);
+      });
+
+      // Auto-select the latest event (first in the list since we ordered by start_date desc)
+      if (events.length > 0) {
+        select.value = events[0].id;
+        // Trigger the change event to load rating bands
+        await loadRatingBands();
+        updateSubmitButton();
+      }
+    } catch (error) {
+      console.error("Error loading events:", error);
+    }
+  }
+
+  async function loadRatingBands() {
+    const eventId = document.getElementById("eventSelect").value;
+    if (!eventId) return;
+
+    try {
+      const { data: bands, error } = await supabase
+        .from("rating_bands")
+        .select("*")
+        .eq("event_id", eventId)
+        .order("id", { ascending: true });
+
+      if (error) throw error;
+
+      await createPlayerSelections(bands, eventId);
+    } catch (error) {
+      console.error("Error loading rating bands:", error);
+    }
+  }
+
+  async function createPlayerSelections(bands, eventId) {
+    const container = document.getElementById("playerSelections");
+    container.innerHTML = "";
+
+    for (const band of bands) {
+      const { data: players, error } = await supabase
+        .from("players")
+        .select("*")
+        .eq("event_id", eventId)
+        .eq("current_rating_band_id", band.id)
+        .eq("is_active", true)
+        .eq("dropped_out", false)
+        .order("name");
+
+      if (error) {
+        console.error("Error loading players for band:", band.name, error);
+        continue;
+      }
+
+      const div = document.createElement("div");
+      div.className = "rating-band-selection";
+      div.setAttribute("data-band-id", band.id);
+      div.innerHTML = `
+            <h3>${band.name}</h3>
+            <select name="player-${band.id}" required>
+                <option value="">Select a player...</option>
+                ${players
+                  .map(
+                    (player) =>
+                      `<option value="${player.id}">${player.name} (${player.current_rating})</option>`
+                  )
+                  .join("")}
+            </select>
+        `;
+      
+      // Add change listener for visual feedback
+      const select = div.querySelector('select');
+      select.addEventListener('change', function() {
+        updateBandStatus(div, this.value);
+        updateSubmitButton();
+      });
+      
+      container.appendChild(div);
+    }
+    
+    // Initially disable submit button
+    updateSubmitButton();
+  }
+
+  function updateBandStatus(bandDiv, selectedValue) {
+    if (selectedValue) {
+      bandDiv.classList.remove('invalid');
+      bandDiv.classList.add('completed');
+    } else {
+      bandDiv.classList.remove('completed');
+      bandDiv.classList.remove('invalid');
+    }
+  }
+
+  function updateSubmitButton() {
+    const submitButton = document.querySelector('button[type="submit"]');
+    const allSelects = document.querySelectorAll('.rating-band-selection select');
+    const allSelected = Array.from(allSelects).every(select => select.value !== '');
+    
+    if (allSelected && allSelects.length > 0) {
+      submitButton.disabled = false;
+      submitButton.textContent = 'Create Team';
+      submitButton.style.opacity = '1';
+    } else {
+      submitButton.disabled = true;
+      submitButton.textContent = allSelects.length === 0 ? 'Select an event first' : 'Select all players';
+      submitButton.style.opacity = '0.6';
+    }
+  }
+
+  async function createTeam(e) {
+    e.preventDefault();
+
+    const teamName = document.getElementById("teamName").value;
+    const eventId = document.getElementById("eventSelect").value;
+    const errorDiv = document.getElementById("teamError");
+    const submitButton = e.target.querySelector('button[type="submit"]');
+
+    // Hide previous errors
+    errorDiv.style.display = "none";
+
+    // Collect selected players and validate
+    const playerSelects = document.querySelectorAll('select[name^="player-"]');
+    const selectedPlayers = [];
+    let hasInvalidSelections = false;
+
+    for (const select of playerSelects) {
+      const bandDiv = select.closest('.rating-band-selection');
+      
+      if (!select.value) {
+        bandDiv.classList.add('invalid');
+        hasInvalidSelections = true;
+      } else {
+        bandDiv.classList.remove('invalid');
+        const bandId = select.name.split("-")[1];
+        selectedPlayers.push({
+          playerId: parseInt(select.value),
+          ratingBandId: parseInt(bandId),
+        });
+      }
+    }
+
+    if (hasInvalidSelections) {
+      errorDiv.textContent = "Please select a player for each rating band";
+      errorDiv.style.display = "block";
+      errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Creating team...";
+
+    try {
+      // Create team
+      const { data: team, error: teamError } = await supabase
+        .from("teams")
+        .insert([
+          {
+            name: teamName,
+            event_id: eventId,
+            user_id: currentUser.id,
+          },
+        ])
+        .select()
+        .single();
+
+      if (teamError) {
+        // Handle unique constraint violation
+        if (teamError.code === '23505' && teamError.message.includes('teams_event_id_name_key')) {
+          throw new Error(`A team named "${teamName}" already exists for this event. Please choose a different name.`);
+        }
+        throw teamError;
+      }
+
+      // Add players to team
+      const teamPlayers = selectedPlayers.map((sp) => ({
+        team_id: team.id,
+        player_id: sp.playerId,
+        rating_band_id: sp.ratingBandId,
+      }));
+
+      const { error: playersError } = await supabase
+        .from("team_players")
+        .insert(teamPlayers);
+
+      if (playersError) throw playersError;
+
+      alert("Team created successfully!");
+      window.location.href = "/teams/";
+    } catch (error) {
+      console.error("Error creating team:", error);
+      errorDiv.textContent = error.message;
+      errorDiv.style.display = "block";
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent = "Create Team";
+    }
+  }
+</script>

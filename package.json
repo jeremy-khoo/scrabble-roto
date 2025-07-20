@@ -1,0 +1,27 @@
+{
+  "name": "scrabble-roto",
+  "version": "1.0.0",
+  "description": "Fantasy Scrabble tournament rotisserie app",
+  "main": "sync-players.js",
+  "scripts": {
+    "dev": "hugo server --buildDrafts",
+    "build": "hugo --gc --minify",
+    "preview": "hugo server --environment production",
+    "sync-players": "node sync-players.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "scrabble",
+    "fantasy",
+    "tournament",
+    "rotisserie",
+    "hugo",
+    "supabase"
+  ],
+  "author": "",
+  "license": "MIT"
+}

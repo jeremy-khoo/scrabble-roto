@@ -1,0 +1,42 @@
+baseURL = '/'
+publishDir = 'public'
+languageCode = 'en-us'
+title = 'Scrabble Roto'
+theme = 'PaperMod'
+
+[params]
+  env = "development"
+  description = "Fantasy Scrabble tournament app"
+  author = "Scrabble Roto"
+  showReadingTime = false
+  showShareButtons = false
+  showPostNavLinks = false
+  
+[params.homeInfoParams]
+  Title = "Scrabble Roto"
+  Content = "Create your fantasy Scrabble team for nationals"
+
+[[menu.main]]
+  name = "Teams"
+  url = "/teams/"
+  weight = 10
+
+[[menu.main]]
+  name = "Create Team"
+  url = "/create-team/"
+  weight = 20
+
+[[menu.main]]
+  name = "Admin"
+  url = "/admin/"
+  weight = 25
+
+[[menu.main]]
+  name = "Login"
+  url = "/login/"
+  weight = 30
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
