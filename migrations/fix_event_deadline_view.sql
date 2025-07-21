@@ -1,4 +1,4 @@
--- Fix missing is_active column in event_deadline_status view
+-- Fix missing is_active and created_at columns in event_deadline_status view
 DROP VIEW IF EXISTS event_deadline_status;
 CREATE OR REPLACE VIEW event_deadline_status AS
 SELECT 
@@ -7,6 +7,7 @@ SELECT
     e.start_date,
     e.team_deadline,
     e.is_active,
+    e.created_at,
     (NOW() < e.team_deadline OR e.team_deadline IS NULL) AS teams_allowed,
     CASE 
         WHEN e.team_deadline IS NULL THEN 'No deadline set'

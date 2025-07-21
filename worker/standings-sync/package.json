@@ -1,0 +1,20 @@
+{
+  "name": "scrabble-standings-sync",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker for syncing Scrabble tournament standings",
+  "main": "standings-sync.js",
+  "scripts": {
+    "dev": "wrangler dev standings-sync.js --config standings-wrangler.toml",
+    "deploy": "wrangler deploy standings-sync.js --config standings-wrangler.toml",
+    "deploy-dev": "wrangler deploy standings-sync.js --config standings-wrangler.toml --env dev",
+    "deploy-prod": "wrangler deploy standings-sync.js --config standings-wrangler.toml --env production",
+    "tail": "wrangler tail --config standings-wrangler.toml",
+    "test": "node ../test-parse.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

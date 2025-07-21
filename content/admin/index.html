@@ -526,7 +526,7 @@ async function loadEventDeadlines() {
                     <div class="event-deadline-item ${!event.teams_allowed ? 'deadline-passed' : 'deadline-open'}">
                         <div class="event-deadline-info">
                             <strong>${event.name}</strong>
-                            <div>Start Date: ${event.start_date ? new Date(event.start_date).toLocaleDateString() : 'Not set'}</div>
+                            <div>Start Date: ${event.start_date ? event.start_date : 'Not set'}</div>
                             <div>Team Deadline: ${event.team_deadline ? new Date(event.team_deadline).toLocaleString('en-US', {timeZone: 'America/New_York'}) + ' EST' : 'Not set'}</div>
                             <div class="deadline-status ${event.teams_allowed ? 'status-open' : 'status-closed'}">${event.status}</div>
                             ${event.hours_until_deadline !== null ? 

@@ -42,6 +42,143 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
+/* Team standings styling */
+.standings-info {
+    background: var(--code-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary);
+}
+
+.teams-standings {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Enhanced team card styling with rank badge */
+.team-card.compact {
+    position: relative;
+    background: var(--theme);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.team-card.compact:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary);
+}
+
+.team-card.compact.own-team {
+    background: linear-gradient(135deg, var(--theme) 0%, var(--code-bg) 100%);
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+
+.team-rank-badge {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: var(--primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.team-rank-badge .rank-number {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.team-tournament-standings {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--border);
+    background: var(--code-bg);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.standings-header {
+    margin-bottom: 0.5rem;
+    color: var(--content);
+}
+
+.standings-stats {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.standings-stats span {
+    color: var(--content);
+    font-size: 0.9rem;
+}
+
+.standings-stats .wins strong,
+.standings-stats .spread strong {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.team-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: var(--secondary);
+}
+
+.team-actions {
+    margin-top: 0.75rem;
+}
+
+.edit-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.edit-btn:hover {
+    background: var(--primary-dark, #0056b3);
+    transform: translateY(-1px);
+}
+
+/* Responsive design for standings */
+@media (max-width: 768px) {
+    .team-rank-badge {
+        position: static;
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
+    
+    .standings-stats {
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .team-meta {
+        justify-content: center;
+        width: 100%;
+    }
+}
+
 /* Beautiful select dropdown styling */
 .form-group select,
 .rating-band-selection select {

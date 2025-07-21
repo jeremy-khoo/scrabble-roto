@@ -1,0 +1,21 @@
+name = "scrabble-standings-sync"
+main = "standings-sync.js"
+compatibility_date = "2024-01-01"
+
+# Cron trigger for hourly sync during tournament hours
+# Runs every hour between 9 AM and 11 PM Eastern Time
+[[triggers]]
+crons = ["0 13-3 * * *"]  # UTC times: 13:00-03:00 next day = 9 AM-11 PM ET
+
+# Environment variables (set these in Cloudflare Dashboard)
+[vars]
+# SUPABASE_URL = "your-supabase-url"
+# SUPABASE_SERVICE_ROLE_KEY = "your-service-role-key"
+
+# For development/testing
+[env.dev]
+name = "scrabble-standings-sync-dev"
+
+# For production
+[env.production]
+name = "scrabble-standings-sync-prod"
