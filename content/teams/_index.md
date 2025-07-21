@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 events(name),
                 team_players(
                     *,
-                    players(name, current_rating, dropped_out, current_rating_band_id, original_rating_band_id),
+                    players(name, current_rating, dropped_out, current_rating_band_id, original_rating_band_id, tournament_wins, tournament_spread),
                     rating_bands(name)
                 )
             `)
@@ -136,7 +136,16 @@ function generateTeamCardWithStandings(team, isOwner, rank) {
         const isInvalid = player.dropped_out || player.current_rating_band_id !== player.original_rating_band_id;
         const invalidClass = isInvalid ? ' class="invalid-player"' : '';
         
-        return `<div${invalidClass}><strong>${player.name}</strong> (${tp.rating_bands.name}) - ${player.current_rating}</div>`;
+        // Format tournament record: wins and spread
+        const wins = player.tournament_wins || 0;
+        const spread = player.tournament_spread || 0;
+        const spreadStr = spread >= 0 ? `+${spread}` : `${spread}`;
+        const record = `${wins} ${spreadStr}`;
+        
+        return `<div${invalidClass}>
+            <strong>${player.name}</strong> 
+            <span class="player-division">(${tp.rating_bands.name})</span> - ${record}
+        </div>`;
     }).join('');
 
     const validityBadge = !team.is_valid ? 

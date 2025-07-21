@@ -179,6 +179,13 @@
     }
 }
 
+/* Player division styling */
+.player-division {
+    color: var(--secondary);
+    opacity: 0.7;
+    font-size: 0.9em;
+}
+
 /* Beautiful select dropdown styling */
 .form-group select,
 .rating-band-selection select {

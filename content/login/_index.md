@@ -26,8 +26,11 @@ layout = 'auth'
     <h2>Create Account</h2>
     <form id="signupForm">
         <div class="form-group">
-            <label for="username">Username:</label>
-            <input type="text" id="username" required>
+            <label for="username">Your Name:</label>
+            <input type="text" id="username" required placeholder="Enter your real name">
+            <small style="color: var(--secondary); font-size: 0.85rem; margin-top: 0.25rem; display: block;">
+                Please use your real name to help other players identify you
+            </small>
         </div>
         <div class="form-group">
             <label for="signupEmail">Email:</label>
