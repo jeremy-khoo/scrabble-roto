@@ -679,6 +679,7 @@ nav .menu,
     padding: 0 var(--gap);
     background: var(--theme);
     border-bottom: 1px solid var(--border);
+    position: relative; /* Enable absolute positioning for mobile menu */
 }
 
 .nav {
@@ -860,8 +861,8 @@ nav .menu,
     
     #menu {
         display: none !important;
-        position: absolute;
-        top: 100%;
+        position: fixed;
+        top: var(--header-height, 60px);
         left: 0;
         right: 0;
         background: var(--theme);
@@ -872,7 +873,9 @@ nav .menu,
         margin: 0;
         padding: 1rem 0;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
+        z-index: 9999;
+        max-height: calc(100vh - var(--header-height, 60px));
+        overflow-y: auto;
     }
     
     #menu.mobile-open {
