@@ -6,7 +6,7 @@ ALTER TABLE events ADD COLUMN team_deadline TIMESTAMP WITH TIME ZONE
     GENERATED ALWAYS AS (
         CASE 
             WHEN start_date IS NOT NULL THEN 
-                (start_date + INTERVAL '6 hours') AT TIME ZONE 'America/New_York' AT TIME ZONE 'UTC'
+                (DATE(start_date) + TIME '06:00:00') AT TIME ZONE 'America/New_York' AT TIME ZONE 'UTC'
             ELSE NULL 
         END
     ) STORED;
@@ -65,6 +65,7 @@ SELECT
     e.name,
     e.start_date,
     e.team_deadline,
+    e.is_active,
     (NOW() < e.team_deadline OR e.team_deadline IS NULL) AS teams_allowed,
     CASE 
         WHEN e.team_deadline IS NULL THEN 'No deadline set'
