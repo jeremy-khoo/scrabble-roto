@@ -121,17 +121,15 @@
             ☰
         </button>
 
-        <!-- Main navigation with user info -->
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <!-- User info - initially hidden, shown by JS when logged in -->
-            <div class="user-info" id="authUserInfo" style="display: none;">
-                <span id="authUserDisplay"></span>
-                <button class="logout-btn" onclick="handleLogout()">Logout</button>
-            </div>
+        <!-- User info - initially hidden, shown by JS when logged in -->
+        <div class="user-info" id="authUserInfo" style="display: none;">
+            <span id="authUserDisplay"></span>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
 
-            <!-- Main menu -->
-            {{- $currentPage := . }}
-            <ul id="menu">
+        <!-- Main menu -->
+        {{- $currentPage := . }}
+        <ul id="menu">
                 {{- range site.Menus.main }}
                 {{- $menu_item_url := (cond (strings.HasSuffix .URL "/") .URL (printf "%s/" .URL) ) | absLangURL }}
                 {{- $page_url:= $currentPage.Permalink | absLangURL }}
@@ -156,7 +154,6 @@
                 </li>
                 {{- end }}
             </ul>
-        </div>
     </nav>
 </header>
 
@@ -180,4 +177,5 @@ async function handleLogout() {
         window.location.href = '/login/';
     }
 }
+
 </script>

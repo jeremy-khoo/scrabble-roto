@@ -675,9 +675,17 @@ nav .menu,
     background-color: var(--border);
 }
 
-#menu .active {
-    font-weight: 500;
-    border-bottom: 2px solid currentColor;
+/* Aggressively disable ALL active styling that causes phantom rectangle */
+#menu .active,
+#menu span.active,
+#menu a .active,
+.nav #menu .active {
+    font-weight: normal !important;
+    border-bottom: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    outline: none !important;
 }
 
 /* User info and logout positioning fixes */
@@ -689,7 +697,7 @@ nav .menu,
     color: var(--content);
 }
 
-/* Allow JavaScript to control user info visibility */
+/* Simple user info visibility control */
 .user-info[style*="display: none"] {
     display: none !important;
 }
@@ -810,4 +818,21 @@ nav .menu,
         flex-direction: column;
         align-items: stretch;
     }
+}
+
+/* FINAL OVERRIDE - Must be at end of file to have highest priority */
+#menu .active,
+#menu span.active,
+span.active,
+.active {
+    font-weight: 500 !important; /* Keep the bold text */
+    border-bottom: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    outline: none !important;
+    height: auto !important;
+    line-height: inherit !important;
+    /* Simple color change instead of underline */
+    color: #28a745 !important; /* Green color for active/current state */
 }
