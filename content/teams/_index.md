@@ -142,10 +142,11 @@ function generateTeamCardWithStandings(team, isOwner, rank) {
         const spreadStr = spread >= 0 ? `+${spread}` : `${spread}`;
         const record = `${wins} ${spreadStr}`;
         
-        return `<div${invalidClass}>
-            <strong>${player.name}</strong> 
-            <span class="player-division">(${tp.rating_bands.name})</span> - ${record}
-        </div>`;
+        return `<tr${invalidClass}>
+            <td><strong>${player.name}</strong></td>
+            <td class="player-division">${tp.rating_bands.name}</td>
+            <td class="player-record">${record}</td>
+        </tr>`;
     }).join('');
 
     const validityBadge = !team.is_valid ? 
@@ -180,9 +181,11 @@ function generateTeamCardWithStandings(team, isOwner, rank) {
                 </div>
                 <div class="team-players">
                     <strong>Players:</strong>
-                    <div class="players-list">
-                        ${playersList}
-                    </div>
+                    <table class="players-table">
+                        <tbody>
+                            ${playersList}
+                        </tbody>
+                    </table>
                 </div>
                 <div class="team-tournament-standings">
                     <div class="standings-header">

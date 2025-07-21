@@ -179,11 +179,37 @@
     }
 }
 
-/* Player division styling */
+/* Player table styling */
+.players-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+}
+
+.players-table td {
+    padding: 0.25rem 0.5rem;
+    border: none;
+    vertical-align: top;
+}
+
+.players-table td:first-child {
+    padding-left: 0;
+}
+
+.players-table td:last-child {
+    text-align: right;
+}
+
 .player-division {
     color: var(--secondary);
     opacity: 0.7;
     font-size: 0.9em;
+}
+
+.player-record {
+    font-family: 'Courier New', monospace;
+    font-size: 0.95em;
+    white-space: nowrap;
 }
 
 /* Beautiful select dropdown styling */
