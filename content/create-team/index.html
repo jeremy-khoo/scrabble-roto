@@ -47,8 +47,17 @@ title = 'Create Team'
 
   async function loadEvents() {
     try {
+      // Check if current user is admin
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", currentUser.id)
+        .single();
+      
+      const isAdmin = profile?.is_admin || false;
+
       const { data: events, error } = await supabase
-        .from("events")
+        .from("event_deadline_status")
         .select("*")
         .eq("is_active", true)
         .order("start_date", { ascending: false });
@@ -59,16 +68,23 @@ title = 'Create Team'
       events.forEach((event, index) => {
         const option = document.createElement("option");
         option.value = event.id;
-        option.textContent = event.name;
+        option.textContent = `${event.name} ${!event.teams_allowed && !isAdmin ? '(CLOSED)' : ''}`;
+        option.disabled = !event.teams_allowed && !isAdmin;
         select.appendChild(option);
       });
 
-      // Auto-select the latest event (first in the list since we ordered by start_date desc)
-      if (events.length > 0) {
-        select.value = events[0].id;
-        // Trigger the change event to load rating bands
+      // Auto-select the latest event (open for users, any for admins)
+      const availableEvent = isAdmin 
+        ? events[0] 
+        : events.find(e => e.teams_allowed);
+        
+      if (availableEvent) {
+        select.value = availableEvent.id;
         await loadRatingBands();
         updateSubmitButton();
+      } else if (events.length > 0 && !isAdmin) {
+        // Show deadline message if no events are open for non-admins
+        showDeadlineMessage(events[0]);
       }
     } catch (error) {
       console.error("Error loading events:", error);
@@ -153,6 +169,17 @@ title = 'Create Team'
     }
   }
 
+  function showDeadlineMessage(event) {
+    const container = document.getElementById("playerSelections");
+    container.innerHTML = `
+      <div class="deadline-message error-message">
+        <h3>Team Creation Closed</h3>
+        <p>The deadline for creating teams for <strong>${event.name}</strong> has passed.</p>
+        <p>Team creation closed at 6:00 AM EST on ${new Date(event.start_date).toLocaleDateString()}.</p>
+      </div>
+    `;
+  }
+
   function updateSubmitButton() {
     const submitButton = document.querySelector('button[type="submit"]');
     const allSelects = document.querySelectorAll(
@@ -218,6 +245,42 @@ title = 'Create Team'
     submitButton.textContent = "Creating team...";
 
     try {
+      // Verify user profile exists before creating team
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", currentUser.id)
+        .single();
+
+      if (profileError || !profile) {
+        throw new Error("User profile not found. Please refresh the page and try again.");
+      }
+
+      // Check if deadline has passed (skip for admins)
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", currentUser.id)
+        .single();
+      
+      const isAdmin = userProfile?.is_admin || false;
+      
+      if (!isAdmin) {
+        const { data: eventStatus, error: statusError } = await supabase
+          .from("event_deadline_status")
+          .select("teams_allowed, status, team_deadline")
+          .eq("id", eventId)
+          .single();
+
+        if (statusError) {
+          throw new Error("Could not verify event status. Please try again.");
+        }
+
+        if (!eventStatus.teams_allowed) {
+          throw new Error(`Team creation deadline has passed. ${eventStatus.status}`);
+        }
+      }
+
       // Create team (default paid status is false)
       const { data: team, error: teamError } = await supabase
         .from("teams")

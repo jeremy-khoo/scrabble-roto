@@ -529,12 +529,63 @@ button[onclick*="Toggle"]:hover {
 .band-item, .player-item, .team-item, .user-item {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem;
+    align-items: flex-start;
+    padding: 1rem;
     border: 1px solid var(--border);
-    border-radius: 4px;
-    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
     background-color: var(--theme);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-item .user-info {
+    flex: 1;
+    padding-right: 1rem;
+    line-height: 1.6;
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.user-item .user-identity {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-item .user-identity strong {
+    color: var(--content);
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.user-item .user-identity div {
+    color: var(--content);
+}
+
+.user-item .user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.user-item .user-details div {
+    color: var(--content);
+}
+
+.user-item .user-details div.admin-yes {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.user-item .user-details small {
+    color: var(--tertiary);
+    font-size: 0.9rem;
+}
+
+.user-item .user-actions {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
 }
 
 .player-item.inactive, .team-item.invalid {
@@ -672,6 +723,85 @@ nav .menu,
     background-color: var(--theme);
     border-color: var(--border);
     color: var(--content);
+}
+
+/* Event deadline status styling */
+.event-deadline-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    background-color: var(--theme);
+}
+
+.event-deadline-item.deadline-open {
+    border-color: #28a745;
+    background-color: rgba(40, 167, 69, 0.05);
+}
+
+.event-deadline-item.deadline-passed {
+    border-color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+.event-deadline-info {
+    flex: 1;
+    line-height: 1.6;
+}
+
+.event-deadline-info strong {
+    display: block;
+    color: var(--content);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.event-deadline-info div {
+    color: var(--content);
+    margin-bottom: 0.25rem;
+}
+
+.deadline-status {
+    font-weight: bold;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+    margin: 0.25rem 0;
+}
+
+.deadline-status.status-open {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.deadline-status.status-closed {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.time-remaining {
+    font-style: italic;
+    color: var(--tertiary);
+    font-size: 0.9rem;
+}
+
+.deadline-message {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.deadline-message h3 {
+    color: #721c24;
+    margin-bottom: 1rem;
+}
+
+.deadline-message p {
+    margin-bottom: 0.5rem;
 }
 
 /* Header layout fixes */

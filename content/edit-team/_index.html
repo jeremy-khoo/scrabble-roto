@@ -76,6 +76,39 @@ async function loadTeamForEditing() {
       throw error;
     }
 
+    // Check if editing is still allowed for this event (skip for admins)
+    const { data: userProfile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", currentUser.id)
+      .single();
+    
+    const isAdmin = userProfile?.is_admin || false;
+    
+    if (!isAdmin) {
+      const { data: eventStatus, error: statusError } = await supabase
+        .from("event_deadline_status")
+        .select("teams_allowed, status, team_deadline")
+        .eq("id", team.events.id)
+        .single();
+
+      if (statusError) {
+        throw new Error("Could not verify event status.");
+      }
+
+      if (!eventStatus.teams_allowed) {
+        document.getElementById('editTeamContainer').innerHTML = `
+          <div class="deadline-message error-message">
+            <h3>Team Editing Closed</h3>
+            <p>The deadline for editing teams for <strong>${team.events.name}</strong> has passed.</p>
+            <p>Team editing closed at 6:00 AM EST on the tournament start date.</p>
+            <p><a href="/teams/">← Back to Teams</a></p>
+          </div>
+        `;
+        return;
+      }
+    }
+
     originalTeam = team;
     
     // Populate form
@@ -249,6 +282,31 @@ async function updateTeam(e) {
   submitButton.textContent = "Updating team...";
 
   try {
+    // Double-check deadline before updating (skip for admins)
+    const { data: userProfile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", currentUser.id)
+      .single();
+    
+    const isAdmin = userProfile?.is_admin || false;
+    
+    if (!isAdmin) {
+      const { data: eventStatus, error: statusError } = await supabase
+        .from("event_deadline_status")
+        .select("teams_allowed, status")
+        .eq("id", originalTeam.events.id)
+        .single();
+
+      if (statusError) {
+        throw new Error("Could not verify event status.");
+      }
+
+      if (!eventStatus.teams_allowed) {
+        throw new Error("Team editing deadline has passed. Changes cannot be saved.");
+      }
+    }
+
     // Update team name
     const { error: teamError } = await supabase
       .from("teams")

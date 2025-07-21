@@ -32,6 +32,14 @@ title = 'Admin Panel'
         </div>
 
         <div class="section">
+            <h3>Event Deadline Status</h3>
+            <button onclick="loadEventDeadlines()">Check Deadlines</button>
+            <div id="eventDeadlinesContainer">
+                <p>Click "Check Deadlines" to view team creation status</p>
+            </div>
+        </div>
+
+        <div class="section">
             <h3>Rating Bands</h3>
             <div class="form-row">
                 <select id="eventSelect">
@@ -161,7 +169,7 @@ function showTab(tabName) {
 async function loadEventsForSelects() {
     try {
         const { data: events, error } = await supabase
-            .from('events')
+            .from('event_deadline_status')
             .select('*')
             .order('created_at', { ascending: false });
             
@@ -176,7 +184,7 @@ async function loadEventsForSelects() {
             events.forEach(event => {
                 const option = document.createElement('option');
                 option.value = event.id;
-                option.textContent = event.name;
+                option.textContent = `${event.name} ${!event.teams_allowed ? '(CLOSED)' : ''}`;
                 select.appendChild(option);
             });
         });
@@ -456,10 +464,14 @@ async function loadUsers() {
                 ${users.map(user => `
                     <div class="user-item">
                         <div class="user-info">
-                            <strong>${user.username || 'No username'}</strong>
-                            <br>Email: ${user.email || 'No email'}
-                            <br>Admin: ${user.is_admin ? 'Yes' : 'No'}
-                            <br><small>Joined: ${new Date(user.created_at).toLocaleDateString()}</small>
+                            <div class="user-identity">
+                                <strong>${user.username || 'No username'}</strong>
+                                <div>${user.email || 'No email'}</div>
+                            </div>
+                            <div class="user-details">
+                                <div class="${user.is_admin ? 'admin-yes' : ''}">Admin: ${user.is_admin ? 'Yes' : 'No'}</div>
+                                <small>Joined: ${new Date(user.created_at).toLocaleDateString()}</small>
+                            </div>
                         </div>
                         <div class="user-actions">
                             <button onclick="toggleAdmin('${user.id}', ${!user.is_admin})">
@@ -496,6 +508,40 @@ function showError(message) {
     errorDiv.textContent = message;
     errorDiv.style.display = 'block';
     setTimeout(() => errorDiv.style.display = 'none', 5000);
+}
+
+async function loadEventDeadlines() {
+    try {
+        const { data: events, error } = await supabase
+            .from('event_deadline_status')
+            .select('*')
+            .order('start_date', { ascending: true });
+            
+        if (error) throw error;
+        
+        const container = document.getElementById('eventDeadlinesContainer');
+        container.innerHTML = `
+            <div class="events-deadline-list">
+                ${events.map(event => `
+                    <div class="event-deadline-item ${!event.teams_allowed ? 'deadline-passed' : 'deadline-open'}">
+                        <div class="event-deadline-info">
+                            <strong>${event.name}</strong>
+                            <div>Start Date: ${event.start_date ? new Date(event.start_date).toLocaleDateString() : 'Not set'}</div>
+                            <div>Team Deadline: ${event.team_deadline ? new Date(event.team_deadline).toLocaleString('en-US', {timeZone: 'America/New_York'}) + ' EST' : 'Not set'}</div>
+                            <div class="deadline-status ${event.teams_allowed ? 'status-open' : 'status-closed'}">${event.status}</div>
+                            ${event.hours_until_deadline !== null ? 
+                                `<div class="time-remaining">${event.hours_until_deadline > 0 ? 
+                                    `${Math.round(event.hours_until_deadline)} hours remaining` : 
+                                    `Deadline passed ${Math.abs(Math.round(event.hours_until_deadline))} hours ago`}</div>` : 
+                                ''}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch (error) {
+        showError('Error loading event deadlines: ' + error.message);
+    }
 }
 
 function showSuccess(message) {
