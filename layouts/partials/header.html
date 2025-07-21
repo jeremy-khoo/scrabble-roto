@@ -116,17 +116,6 @@
             </div>
         </div>
 
-        <!-- Mobile menu toggle -->
-        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu">
-            ☰
-        </button>
-
-        <!-- User info - initially hidden, shown by JS when logged in -->
-        <div class="user-info" id="authUserInfo" style="display: none;">
-            <span id="authUserDisplay"></span>
-            <button class="logout-btn" onclick="handleLogout()">Logout</button>
-        </div>
-
         <!-- Main menu -->
         {{- $currentPage := . }}
         <ul id="menu">
@@ -154,6 +143,17 @@
                 </li>
                 {{- end }}
             </ul>
+
+        <!-- User info - initially hidden, shown by JS when logged in -->
+        <div class="user-info" id="authUserInfo" style="display: none;">
+            <span id="authUserDisplay"></span>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+
+        <!-- Mobile menu toggle -->
+        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu">
+            ☰
+        </button>
     </nav>
 </header>
 

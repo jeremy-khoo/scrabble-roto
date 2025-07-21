@@ -57,32 +57,74 @@ function displayTeams(teams) {
         return;
     }
 
-    const html = teams.map(team => {
-        const playersList = team.team_players.map(tp => {
-            const player = tp.players;
-            const isInvalid = player.dropped_out || player.current_rating_band_id !== player.original_rating_band_id;
-            const invalidClass = isInvalid ? ' style="color: red; font-weight: bold;"' : '';
-            
-            return `<li${invalidClass}>${player.name} (${tp.rating_bands.name}) - ${player.current_rating}</li>`;
-        }).join('');
+    // Separate user's teams from others
+    const userTeams = teams.filter(team => currentUser && team.user_id === currentUser.id);
+    const otherTeams = teams.filter(team => !currentUser || team.user_id !== currentUser.id);
 
-        const validityBadge = team.is_valid ? 
-            '<span class="badge valid">Valid</span>' : 
-            '<span class="badge invalid">Invalid</span>';
+    let html = '';
 
-        return `
-            <div class="team-card">
-                <h3>${team.name} ${validityBadge}</h3>
-                <p><strong>Created by:</strong> ${team.creator_username}</p>
-                <p><strong>Event:</strong> ${team.events?.name || 'Unknown'}</p>
-                <p><strong>Players:</strong></p>
-                <ul>${playersList}</ul>
-                <p><small>Created: ${new Date(team.created_at).toLocaleDateString()}</small></p>
-            </div>
-        `;
-    }).join('');
+    // Display user's teams first (if any)
+    if (userTeams.length > 0) {
+        html += '<h2>Your Teams</h2>';
+        html += userTeams.map(team => generateTeamCard(team, true)).join('');
+        
+        if (otherTeams.length > 0) {
+            html += '<h2 style="margin-top: 2rem;">Other Teams</h2>';
+        }
+    }
+
+    // Display other teams
+    if (otherTeams.length > 0) {
+        html += otherTeams.map(team => generateTeamCard(team, false)).join('');
+    }
 
     container.innerHTML = html;
+}
+
+function generateTeamCard(team, isOwner) {
+    const playersList = team.team_players.map(tp => {
+        const player = tp.players;
+        const isInvalid = player.dropped_out || player.current_rating_band_id !== player.original_rating_band_id;
+        const invalidClass = isInvalid ? ' class="invalid-player"' : '';
+        
+        return `<div${invalidClass}><strong>${player.name}</strong> (${tp.rating_bands.name}) - ${player.current_rating}</div>`;
+    }).join('');
+
+    const validityBadge = !team.is_valid ? 
+        '<span class="badge invalid">Invalid</span>' : '';
+
+    const paidBadge = team.paid ? 
+        '<span class="badge paid">Paid</span>' : 
+        '<span class="badge tentative">Tentative</span>';
+
+    const editButton = isOwner ? 
+        `<button onclick="window.location.href='/edit-team/?id=${team.id}'" class="edit-btn">Edit</button>` : '';
+
+    return `
+        <div class="team-card compact">
+            <div class="team-header">
+                <h3>${team.name}</h3>
+                <div class="team-badges">
+                    ${validityBadge}
+                    ${paidBadge}
+                </div>
+            </div>
+            <div class="team-info">
+                <div class="team-meta">
+                    <span><strong>By:</strong> ${team.creator_username}</span>
+                    <span><strong>Event:</strong> ${team.events?.name || 'Unknown'}</span>
+                    <span><small>Created: ${new Date(team.created_at).toLocaleDateString()}</small></span>
+                </div>
+                <div class="team-players">
+                    <strong>Players:</strong>
+                    <div class="players-list">
+                        ${playersList}
+                    </div>
+                </div>
+                ${editButton ? `<div class="team-actions">${editButton}</div>` : ''}
+            </div>
+        </div>
+    `;
 }
 </script>
 

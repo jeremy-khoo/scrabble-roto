@@ -218,7 +218,7 @@ title = 'Create Team'
     submitButton.textContent = "Creating team...";
 
     try {
-      // Create team
+      // Create team (default paid status is false)
       const { data: team, error: teamError } = await supabase
         .from("teams")
         .insert([
@@ -226,6 +226,7 @@ title = 'Create Team'
             name: teamName,
             event_id: eventId,
             user_id: currentUser.id,
+            paid: false,
           },
         ])
         .select()

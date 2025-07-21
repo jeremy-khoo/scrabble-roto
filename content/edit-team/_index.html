@@ -1,0 +1,304 @@
++++
+date = '2025-07-21T12:00:00-04:00'
+draft = false
+title = 'Edit Team'
++++
+
+<h1>Edit Your Team</h1>
+
+<div id="editTeamContainer">
+  <div id="loadingMessage">Loading team...</div>
+  <form id="editTeamForm" style="display: none;">
+    <div class="form-group">
+      <label for="teamName">Team Name:</label>
+      <input type="text" id="teamName" required />
+    </div>
+
+    <div class="form-group">
+      <label for="eventSelect">Event:</label>
+      <select id="eventSelect" disabled>
+        <option value="">Loading...</option>
+      </select>
+    </div>
+
+    <div id="playerSelections"></div>
+
+    <div id="teamError" class="error-message" style="display: none"></div>
+    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+      <button type="submit">Update Team</button>
+      <button type="button" onclick="window.location.href='/teams/'" class="secondary">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<script>
+let teamId = null;
+let originalTeam = null;
+
+document.addEventListener("DOMContentLoaded", async function () {
+  if (!(await requireAuth())) return;
+
+  // Get team ID from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  teamId = urlParams.get('id');
+  
+  if (!teamId) {
+    document.getElementById('editTeamContainer').innerHTML = '<p>No team ID specified. <a href="/teams/">Go back to teams</a></p>';
+    return;
+  }
+
+  await loadTeamForEditing();
+  document.getElementById("editTeamForm").addEventListener("submit", updateTeam);
+});
+
+async function loadTeamForEditing() {
+  try {
+    // Load the specific team with all details
+    const { data: team, error } = await supabase
+      .from('teams')
+      .select(`
+        *,
+        events(id, name),
+        team_players(
+          *,
+          players(id, name, current_rating, dropped_out, current_rating_band_id, original_rating_band_id, is_active),
+          rating_bands(id, name)
+        )
+      `)
+      .eq('id', teamId)
+      .eq('user_id', currentUser.id) // Ensure user owns this team
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        throw new Error('Team not found or you do not have permission to edit it.');
+      }
+      throw error;
+    }
+
+    originalTeam = team;
+    
+    // Populate form
+    document.getElementById('teamName').value = team.name;
+    document.getElementById('eventSelect').innerHTML = `<option value="${team.events.id}">${team.events.name}</option>`;
+    document.getElementById('eventSelect').value = team.events.id;
+
+    await loadRatingBandsForEdit(team.events.id, team.team_players);
+    
+    document.getElementById('loadingMessage').style.display = 'none';
+    document.getElementById('editTeamForm').style.display = 'block';
+    
+  } catch (error) {
+    console.error('Error loading team:', error);
+    document.getElementById('editTeamContainer').innerHTML = `<p>Error: ${error.message} <a href="/teams/">Go back to teams</a></p>`;
+  }
+}
+
+async function loadRatingBandsForEdit(eventId, currentTeamPlayers) {
+  try {
+    const { data: bands, error } = await supabase
+      .from("rating_bands")
+      .select("*")
+      .eq("event_id", eventId)
+      .order("id", { ascending: true });
+
+    if (error) throw error;
+
+    await createPlayerSelectionsForEdit(bands, eventId, currentTeamPlayers);
+  } catch (error) {
+    console.error("Error loading rating bands:", error);
+    showError("Error loading rating bands: " + error.message);
+  }
+}
+
+async function createPlayerSelectionsForEdit(bands, eventId, currentTeamPlayers) {
+  const container = document.getElementById("playerSelections");
+  container.innerHTML = "";
+
+  for (const band of bands) {
+    // Load ALL players for this band (including inactive/dropped ones for editing)
+    const { data: players, error } = await supabase
+      .from("players")
+      .select("*")
+      .eq("event_id", eventId)
+      .eq("current_rating_band_id", band.id)
+      .order("current_rating", { ascending: false });
+
+    if (error) {
+      console.error("Error loading players for band:", band.name, error);
+      continue;
+    }
+
+    // Find current selection for this band
+    const currentPlayer = currentTeamPlayers.find(tp => tp.rating_bands.id === band.id);
+
+    const div = document.createElement("div");
+    div.className = "rating-band-selection";
+    div.setAttribute("data-band-id", band.id);
+    
+    let playerOptions = '<option value="">Select a player...</option>';
+    
+    // Add active players first
+    const activePlayers = players.filter(p => p.is_active && !p.dropped_out);
+    activePlayers.forEach(player => {
+      const selected = currentPlayer && currentPlayer.players.id === player.id ? 'selected' : '';
+      playerOptions += `<option value="${player.id}" ${selected}>${player.name} (${player.current_rating})</option>`;
+    });
+    
+    // Add inactive/dropped players (for teams that have them)
+    const inactivePlayers = players.filter(p => !p.is_active || p.dropped_out);
+    if (inactivePlayers.length > 0) {
+      playerOptions += '<optgroup label="Inactive/Dropped Players">';
+      inactivePlayers.forEach(player => {
+        const selected = currentPlayer && currentPlayer.players.id === player.id ? 'selected' : '';
+        const status = player.dropped_out ? ' - DROPPED' : ' - INACTIVE';
+        playerOptions += `<option value="${player.id}" ${selected}>${player.name} (${player.current_rating})${status}</option>`;
+      });
+      playerOptions += '</optgroup>';
+    }
+
+    div.innerHTML = `
+      <h3>${band.name}</h3>
+      <select name="player-${band.id}" required>
+        ${playerOptions}
+      </select>
+    `;
+
+    // Add change listener for visual feedback
+    const select = div.querySelector("select");
+    select.addEventListener("change", function () {
+      updateBandStatus(div, this.value);
+      updateSubmitButton();
+    });
+
+    // Set initial status
+    updateBandStatus(div, select.value);
+
+    container.appendChild(div);
+  }
+
+  updateSubmitButton();
+}
+
+function updateBandStatus(bandDiv, selectedValue) {
+  if (selectedValue) {
+    bandDiv.classList.remove("invalid");
+    bandDiv.classList.add("completed");
+  } else {
+    bandDiv.classList.remove("completed");
+    bandDiv.classList.remove("invalid");
+  }
+}
+
+function updateSubmitButton() {
+  const submitButton = document.querySelector('button[type="submit"]');
+  const allSelects = document.querySelectorAll(".rating-band-selection select");
+  const allSelected = Array.from(allSelects).every(select => select.value !== "");
+
+  if (allSelected && allSelects.length > 0) {
+    submitButton.disabled = false;
+    submitButton.textContent = "Update Team";
+    submitButton.style.opacity = "1";
+  } else {
+    submitButton.disabled = true;
+    submitButton.textContent = "Please select all players";
+    submitButton.style.opacity = "0.6";
+  }
+}
+
+async function updateTeam(e) {
+  e.preventDefault();
+
+  const teamName = document.getElementById("teamName").value;
+  const errorDiv = document.getElementById("teamError");
+  const submitButton = e.target.querySelector('button[type="submit"]');
+
+  // Hide previous errors
+  errorDiv.style.display = "none";
+
+  // Collect selected players and validate
+  const playerSelects = document.querySelectorAll('select[name^="player-"]');
+  const selectedPlayers = [];
+  let hasInvalidSelections = false;
+
+  for (const select of playerSelects) {
+    const bandDiv = select.closest(".rating-band-selection");
+
+    if (!select.value) {
+      bandDiv.classList.add("invalid");
+      hasInvalidSelections = true;
+    } else {
+      bandDiv.classList.remove("invalid");
+      const bandId = select.name.split("-")[1];
+
+      selectedPlayers.push({
+        playerId: parseInt(select.value),
+        ratingBandId: parseInt(bandId),
+      });
+    }
+  }
+
+  if (hasInvalidSelections) {
+    errorDiv.textContent = "Please select a player for each rating band";
+    errorDiv.style.display = "block";
+    errorDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+
+  submitButton.disabled = true;
+  submitButton.textContent = "Updating team...";
+
+  try {
+    // Update team name
+    const { error: teamError } = await supabase
+      .from("teams")
+      .update({ name: teamName })
+      .eq("id", teamId);
+
+    if (teamError) {
+      // Handle unique constraint violation
+      if (teamError.code === "23505" && teamError.message.includes("teams_event_id_name_key")) {
+        throw new Error(`A team named "${teamName}" already exists for this event. Please choose a different name.`);
+      }
+      throw teamError;
+    }
+
+    // Delete existing team players
+    const { error: deleteError } = await supabase
+      .from("team_players")
+      .delete()
+      .eq("team_id", teamId);
+
+    if (deleteError) throw deleteError;
+
+    // Add new players to team
+    const teamPlayers = selectedPlayers.map((sp) => ({
+      team_id: teamId,
+      player_id: sp.playerId,
+      rating_band_id: sp.ratingBandId,
+    }));
+
+    const { error: playersError } = await supabase
+      .from("team_players")
+      .insert(teamPlayers);
+
+    if (playersError) throw playersError;
+
+    alert("Team updated successfully!");
+    window.location.href = "/teams/";
+  } catch (error) {
+    console.error("Error updating team:", error);
+    errorDiv.textContent = error.message;
+    errorDiv.style.display = "block";
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Update Team";
+  }
+}
+
+function showError(message) {
+  const errorDiv = document.getElementById("teamError");
+  errorDiv.textContent = message;
+  errorDiv.style.display = "block";
+}
+</script>

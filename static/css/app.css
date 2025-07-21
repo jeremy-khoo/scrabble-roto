@@ -262,6 +262,90 @@ button[onclick*="Toggle"]:hover {
     margin: 0.5rem 0;
 }
 
+/* Compact team card styling */
+.team-card.compact {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.team-card.compact .team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.team-card.compact .team-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.team-card.compact .team-badges {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.team-card.compact .team-info {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.team-card.compact .team-meta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.team-card.compact .team-meta span {
+    color: var(--content);
+}
+
+.team-card.compact .team-players {
+    color: var(--content);
+    margin-bottom: 0.5rem;
+}
+
+.team-card.compact .players-list {
+    margin-top: 0.25rem;
+}
+
+.team-card.compact .players-list > div {
+    font-size: 0.85rem;
+    line-height: 1.3;
+    margin-bottom: 0.1rem;
+    color: var(--content);
+}
+
+.team-card.compact .players-list .invalid-player {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.team-card.compact .team-actions {
+    margin-top: 0.5rem;
+}
+
+.team-card.compact .edit-btn {
+    background: linear-gradient(135deg, #6f42c1 0%, #59359a 100%);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.team-card.compact .edit-btn:hover {
+    background: linear-gradient(135deg, #59359a 0%, #4c2c85 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(111, 66, 193, 0.3);
+}
+
 /* Badge styling */
 .badge {
     padding: 0.25rem 0.5rem;
@@ -269,6 +353,8 @@ button[onclick*="Toggle"]:hover {
     font-size: 0.8rem;
     font-weight: bold;
     text-transform: uppercase;
+    display: inline-block;
+    margin: 0 0.25rem;
 }
 
 .badge.valid {
@@ -279,6 +365,16 @@ button[onclick*="Toggle"]:hover {
 .badge.invalid {
     background-color: #f8d7da;
     color: #721c24;
+}
+
+.badge.paid {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.badge.tentative {
+    background-color: #fff3cd;
+    color: #856404;
 }
 
 /* Rating band selection styling */
@@ -449,6 +545,14 @@ button[onclick*="Toggle"]:hover {
 .invalid-badge {
     color: #e53e3e;
     font-weight: bold;
+}
+
+.paid-status {
+    color: var(--content);
+}
+
+.paid-status strong {
+    color: var(--content);
 }
 
 /* Message styling */
@@ -690,11 +794,13 @@ nav .menu,
 
 /* User info and logout positioning fixes */
 .user-info {
+    display: flex !important;
     align-items: center !important;
     gap: 1rem;
     height: var(--header-height);
     font-size: 14px;
     color: var(--content);
+    margin-left: auto; /* Push to the right */
 }
 
 /* Simple user info visibility control */
@@ -707,26 +813,26 @@ nav .menu,
 }
 
 .user-info .logout-btn {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
-    color: white !important;
-    padding: 0.4rem 0.8rem !important;
-    border: none !important;
+    background: transparent !important;
+    color: var(--content) !important;
+    padding: 0.5rem 0.8rem !important;
+    border: 1px solid var(--border) !important;
     border-radius: 6px !important;
-    font-size: 0.8rem !important;
-    font-weight: 500 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
+    font-size: 0.9rem !important;
+    font-weight: normal !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
     margin: 0 !important;
     height: auto !important;
     line-height: 1 !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
 }
 
 .user-info .logout-btn:hover {
-    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%) !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3) !important;
+    background: var(--border) !important;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 /* Burger menu for mobile */

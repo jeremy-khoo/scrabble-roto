@@ -12,10 +12,6 @@ showReadingTime = false
 showShareButtons = false
 showPostNavLinks = false
 
-[params.homeInfoParams]
-Title = "Scrabble Roto"
-Content = "Create your fantasy Scrabble team for nationals! Click login above to register, then you can see existing teams or create new teams. After creating a team, please send $20 to Joey K via PayPal."
-
 [[menu.main]]
 name = "Teams"
 url = "/teams/"

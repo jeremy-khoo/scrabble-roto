@@ -344,10 +344,6 @@ async function loadPlayers() {
                             ${player.dropped_out ? ' - DROPPED' : ''}
                             ${!player.is_active ? ' - INACTIVE' : ''}
                         </div>
-                        <div class="player-actions">
-                            <button onclick="editPlayer(${player.id})">Edit</button>
-                            <button onclick="deletePlayer(${player.id})" class="danger">Delete</button>
-                        </div>
                     </div>
                 `).join('')}
             </div>
@@ -357,23 +353,6 @@ async function loadPlayers() {
     }
 }
 
-async function deletePlayer(playerId) {
-    if (!confirm('Are you sure? This will invalidate teams with this player.')) return;
-    
-    try {
-        const { error } = await supabase
-            .from('players')
-            .delete()
-            .eq('id', playerId);
-            
-        if (error) throw error;
-        
-        showSuccess('Player deleted successfully!');
-        loadPlayers();
-    } catch (error) {
-        showError('Error deleting player: ' + error.message);
-    }
-}
 
 async function loadAllTeams() {
     try {
@@ -381,12 +360,24 @@ async function loadAllTeams() {
             .from('teams')
             .select(`
                 *,
-                profiles:user_id(username, email),
                 events(name)
             `)
             .order('created_at', { ascending: false });
             
         if (error) throw error;
+
+        // Get usernames for team creators
+        const userIds = [...new Set(teams.map(team => team.user_id))];
+        const { data: usernames } = await supabase
+            .from('public_profiles')
+            .select('id, username')
+            .in('id', userIds);
+
+        // Add usernames to teams
+        teams.forEach(team => {
+            const user = usernames?.find(u => u.id === team.user_id);
+            team.creator_username = user?.username || 'Unknown';
+        });
         
         const container = document.getElementById('adminTeamsContainer');
         container.innerHTML = `
@@ -394,12 +385,17 @@ async function loadAllTeams() {
                 ${teams.map(team => `
                     <div class="team-item ${!team.is_valid ? 'invalid' : ''}">
                         <div class="team-info">
-                            <strong>${team.name}</strong> by ${team.profiles?.username || 'Unknown'}
+                            <strong>${team.name}</strong> by ${team.creator_username}
                             <br><small>Event: ${team.events?.name || 'Unknown'}</small>
-                            <br><small>Email: ${team.profiles?.email || 'Unknown'}</small>
+                            <br><small>User ID: ${team.user_id}</small>
+                            <br><small>Created: ${new Date(team.created_at).toLocaleDateString()}</small>
                             ${!team.is_valid ? '<br><span class="invalid-badge">INVALID</span>' : ''}
+                            <br><span class="paid-status">Payment Status: <strong>${team.paid ? 'PAID' : 'UNPAID'}</strong></span>
                         </div>
                         <div class="team-actions">
+                            <button onclick="togglePaidStatus(${team.id}, ${!team.paid})" class="${team.paid ? 'warning' : 'success'}">
+                                ${team.paid ? 'Mark Unpaid' : 'Mark Paid'}
+                            </button>
                             <button onclick="deleteTeam(${team.id})" class="danger">Delete Team</button>
                         </div>
                     </div>
@@ -408,6 +404,22 @@ async function loadAllTeams() {
         `;
     } catch (error) {
         showError('Error loading teams: ' + error.message);
+    }
+}
+
+async function togglePaidStatus(teamId, newPaidStatus) {
+    try {
+        const { error } = await supabase
+            .from('teams')
+            .update({ paid: newPaidStatus })
+            .eq('id', teamId);
+            
+        if (error) throw error;
+        
+        showSuccess(`Team payment status updated to ${newPaidStatus ? 'PAID' : 'UNPAID'}!`);
+        loadAllTeams();
+    } catch (error) {
+        showError('Error updating team payment status: ' + error.message);
     }
 }
 
