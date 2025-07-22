@@ -53,8 +53,18 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 async function loadTeamForEditing() {
   try {
+    // Check admin status first
+    const { data: userProfile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", currentUser.id)
+      .single();
+    
+    const isAdmin = userProfile?.is_admin || false;
+    
     // Load the specific team with all details
-    const { data: team, error } = await supabase
+    // Admins can edit any team, regular users can only edit their own
+    let teamQuery = supabase
       .from('teams')
       .select(`
         *,
@@ -65,9 +75,14 @@ async function loadTeamForEditing() {
           rating_bands(id, name)
         )
       `)
-      .eq('id', teamId)
-      .eq('user_id', currentUser.id) // Ensure user owns this team
-      .single();
+      .eq('id', teamId);
+    
+    // Only add user_id filter for non-admins
+    if (!isAdmin) {
+      teamQuery = teamQuery.eq('user_id', currentUser.id);
+    }
+    
+    const { data: team, error } = await teamQuery.single();
 
     if (error) {
       if (error.code === 'PGRST116') {
@@ -75,15 +90,6 @@ async function loadTeamForEditing() {
       }
       throw error;
     }
-
-    // Check if editing is still allowed for this event (skip for admins)
-    const { data: userProfile } = await supabase
-      .from("profiles")
-      .select("is_admin")
-      .eq("id", currentUser.id)
-      .single();
-    
-    const isAdmin = userProfile?.is_admin || false;
     
     if (!isAdmin) {
       const { data: eventStatus, error: statusError } = await supabase
