@@ -62,6 +62,30 @@ async function loadTeamForEditing() {
     
     const isAdmin = userProfile?.is_admin || false;
     
+    // If not admin, check if user owns this team before loading full details
+    if (!isAdmin) {
+      const { data: teamOwnership, error: ownershipError } = await supabase
+        .from('teams')
+        .select('user_id')
+        .eq('id', teamId)
+        .single();
+      
+      if (ownershipError || !teamOwnership) {
+        throw new Error('Team not found.');
+      }
+      
+      if (teamOwnership.user_id !== currentUser.id) {
+        document.getElementById('editTeamContainer').innerHTML = `
+          <div class="error-message">
+            <h3>Access Denied</h3>
+            <p>You do not have permission to edit this team.</p>
+            <p><a href="/teams/">← Back to Teams</a></p>
+          </div>
+        `;
+        return;
+      }
+    }
+    
     // Load the specific team with all details
     // Admins can edit any team, regular users can only edit their own
     let teamQuery = supabase
