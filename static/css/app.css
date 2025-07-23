@@ -492,6 +492,27 @@ button[onclick*="Toggle"]:hover {
     font-weight: bold;
 }
 
+/* Invalid player styling for table rows */
+.players-table tr.invalid-player td {
+    color: #dc3545;
+}
+
+.players-table tr.invalid-player:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Invalid player indicator */
+.invalid-indicator {
+    margin-left: 0.25rem;
+    cursor: help;
+    font-size: 0.9em;
+    vertical-align: middle;
+}
+
+.invalid-indicator:hover {
+    filter: brightness(1.2);
+}
+
 .team-card.compact .team-actions {
     margin-top: 0.5rem;
 }

@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 events(name),
                 team_players(
                     *,
-                    players(name, current_rating, dropped_out, current_rating_band_id, original_rating_band_id, tournament_wins, tournament_spread),
+                    players(name, current_rating, dropped_out, current_rating_band_id, original_rating_band_id, tournament_wins, tournament_spread, is_valid, invalid_reason),
                     rating_bands(name)
                 )
             `)
@@ -133,8 +133,20 @@ function displayTeams(teams) {
 function generateTeamCardWithStandings(team, isOwner, rank) {
     const playersList = team.team_players.map(tp => {
         const player = tp.players;
-        const isInvalid = player.dropped_out || player.current_rating_band_id !== player.original_rating_band_id;
+        const isInvalid = player.is_valid === false || player.dropped_out || player.current_rating_band_id !== player.original_rating_band_id;
         const invalidClass = isInvalid ? ' class="invalid-player"' : '';
+        
+        // Get the invalid reason
+        let invalidReason = '';
+        if (player.invalid_reason) {
+            invalidReason = player.invalid_reason;
+        } else if (player.dropped_out) {
+            invalidReason = 'Player dropped out';
+        } else if (player.current_rating_band_id !== player.original_rating_band_id) {
+            invalidReason = 'Player changed rating bands';
+        }
+        
+        const invalidTitle = invalidReason ? ` title="${invalidReason}"` : '';
         
         // Format tournament record: wins and spread
         const wins = player.tournament_wins || 0;
@@ -142,8 +154,11 @@ function generateTeamCardWithStandings(team, isOwner, rank) {
         const spreadStr = spread >= 0 ? `+${spread}` : `${spread}`;
         const record = `${wins} ${spreadStr}`;
         
-        return `<tr${invalidClass}>
-            <td><strong>${player.name}</strong></td>
+        // Add an indicator for invalid players
+        const invalidIndicator = isInvalid ? '<span class="invalid-indicator" title="' + invalidReason + '">⚠️</span>' : '';
+        
+        return `<tr${invalidClass}${invalidTitle}>
+            <td><strong>${player.name}</strong>${invalidIndicator}</td>
             <td class="player-division">${tp.rating_bands.name}</td>
             <td class="player-record">${record}</td>
         </tr>`;
