@@ -72,7 +72,7 @@ async function loadTeamForEditing() {
         team_players(
           *,
           players(id, name, current_rating, dropped_out, current_rating_band_id, original_rating_band_id, is_active),
-          rating_bands(id, name)
+          rating_bands!team_players_drafted_rating_band_id_fkey(id, name)
         )
       `)
       .eq('id', teamId);

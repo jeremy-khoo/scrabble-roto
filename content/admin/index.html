@@ -334,7 +334,7 @@ async function loadPlayers() {
             .from('players')
             .select(`
                 *,
-                rating_bands:current_rating_band_id(name)
+                rating_bands!players_current_rating_band_id_fkey(name)
             `)
             .eq('event_id', eventId)
             .order('name');
