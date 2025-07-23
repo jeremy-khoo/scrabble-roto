@@ -24,9 +24,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 *,
                 events(name),
                 team_players(
-                    *,
-                    players(name, current_rating, dropped_out, current_rating_band_id, original_rating_band_id, tournament_wins, tournament_spread, is_valid, invalid_reason),
-                    rating_bands(name)
+                    drafted_rating_band_id, drafted_division,
+                    players(name, current_rating, dropped_out, current_rating_band_id, current_division, tournament_wins, tournament_spread),
+                    rating_bands!team_players_drafted_rating_band_id_fkey(name)
                 )
             `)
             .order('created_at', { ascending: false });
@@ -133,17 +133,17 @@ function displayTeams(teams) {
 function generateTeamCardWithStandings(team, isOwner, rank) {
     const playersList = team.team_players.map(tp => {
         const player = tp.players;
-        const isInvalid = player.is_valid === false || player.dropped_out || player.current_rating_band_id !== player.original_rating_band_id;
+        const isInvalid = player.dropped_out || player.current_rating_band_id !== tp.drafted_rating_band_id || player.current_division !== tp.drafted_division;
         const invalidClass = isInvalid ? ' class="invalid-player"' : '';
         
         // Get the invalid reason
         let invalidReason = '';
-        if (player.invalid_reason) {
-            invalidReason = player.invalid_reason;
-        } else if (player.dropped_out) {
+        if (player.dropped_out) {
             invalidReason = 'Player dropped out';
-        } else if (player.current_rating_band_id !== player.original_rating_band_id) {
-            invalidReason = 'Player changed rating bands';
+        } else if (player.current_division !== tp.drafted_division) {
+            invalidReason = 'Player changed divisions';
+        } else if (player.current_rating_band_id !== tp.drafted_rating_band_id) {
+            invalidReason = `Player moved from drafted rating band (now ${player.current_rating})`;
         }
         
         const invalidTitle = invalidReason ? ` title="${invalidReason}"` : '';

@@ -313,10 +313,10 @@ async function updateTeam(e) {
       }
     }
 
-    // Update team name
+    // Update team name and reset validity (since UI only allows valid selections)
     const { error: teamError } = await supabase
       .from("teams")
-      .update({ name: teamName })
+      .update({ name: teamName, is_valid: true })
       .eq("id", teamId);
 
     if (teamError) {
