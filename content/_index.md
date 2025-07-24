@@ -13,7 +13,7 @@ Create your Scrabble Roto team for Nationals!
 Make sure to send as "Friends and Family" and leave the notes blank.
     - You can also pay him cash in Baltimore
 - You can create up to 4 teams for a discount to $70.
-- Deadline for creating a team - **August 9, 2025, at 9AM EST**.
+- Deadline for creating a team - **Friday, August 8, 2025, at 11:59:59 PM**.
 
 ## Getting Started
 Click **Teams** to see existing teams or **Create Team** to build your own fantasy roster.
