@@ -27,6 +27,13 @@ title = 'Admin Panel'
                     <input type="date" id="eventStartDate">
                     <input type="date" id="eventEndDate">
                 </div>
+                <div class="form-row">
+                    <label for="eventTeamDeadline" style="display: flex; align-items: center; gap: 0.5rem;">
+                        Team Deadline (optional):
+                        <input type="datetime-local" id="eventTeamDeadline" style="flex: 1;">
+                    </label>
+                    <small style="color: #666; margin-left: 0.5rem;">Your timezone: <span id="createTimezone"></span></small>
+                </div>
                 <button type="submit">Create Event</button>
             </form>
         </div>
@@ -36,6 +43,32 @@ title = 'Admin Panel'
             <button onclick="loadEventDeadlines()">Check Deadlines</button>
             <div id="eventDeadlinesContainer">
                 <p>Click "Check Deadlines" to view team creation status</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Edit Event Deadlines</h3>
+            <div class="form-row">
+                <select id="deadlineEventSelect">
+                    <option value="">Select Event to Edit Deadline...</option>
+                </select>
+                <button onclick="loadEventForDeadlineEdit()">Edit Deadline</button>
+            </div>
+            <div id="deadlineEditContainer" style="display: none;">
+                <form id="deadlineEditForm">
+                    <div class="form-row">
+                        <label for="editEventDeadline" style="display: flex; align-items: center; gap: 0.5rem;">
+                            Team Deadline:
+                            <input type="datetime-local" id="editEventDeadline" style="flex: 1;">
+                        </label>
+                        <small style="color: #666; margin-left: 0.5rem;">Your timezone: <span id="editTimezone"></span></small>
+                    </div>
+                    <div class="form-row">
+                        <button type="submit">Update Deadline</button>
+                        <button type="button" onclick="clearDeadline()">Clear Deadline</button>
+                        <button type="button" onclick="cancelDeadlineEdit()">Cancel</button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -59,24 +92,8 @@ title = 'Admin Panel'
         <h2>Players Management</h2>
         
         <div class="section">
-            <h3>Add New Player</h3>
-            <form id="playerForm">
-                <div class="form-row">
-                    <select id="playerEventSelect" required>
-                        <option value="">Select Event...</option>
-                    </select>
-                    <input type="text" id="playerName" placeholder="Player Name" required>
-                </div>
-                <div class="form-row">
-                    <input type="number" id="playerRating" placeholder="Rating" required>
-                    <input type="text" id="playerExternalId" placeholder="External ID (optional)">
-                </div>
-                <button type="submit">Add Player</button>
-            </form>
-        </div>
-
-        <div class="section">
-            <h3>Existing Players</h3>
+            <h3>Player Data</h3>
+            <p class="info-note">Player data is automatically synced from external APIs. Use the sync-players script to update player information.</p>
             <div class="form-row">
                 <select id="playerEventFilter">
                     <option value="">Select Event...</option>
@@ -127,9 +144,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     checkAdminAccess();
     loadEventsForSelects();
     
+    // Show current timezone
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const timezoneElements = document.querySelectorAll('#createTimezone, #editTimezone');
+    timezoneElements.forEach(el => el.textContent = timezone);
+    
     // Form submissions
     document.getElementById('eventForm').addEventListener('submit', createEvent);
-    document.getElementById('playerForm').addEventListener('submit', createPlayer);
 });
 
 async function checkAdminAccess() {
@@ -175,7 +196,7 @@ async function loadEventsForSelects() {
             
         if (error) throw error;
         
-        const selects = ['eventSelect', 'playerEventSelect', 'playerEventFilter'];
+        const selects = ['eventSelect', 'playerEventFilter', 'deadlineEventSelect'];
         selects.forEach(selectId => {
             const select = document.getElementById(selectId);
             // Clear existing options except first
@@ -196,11 +217,13 @@ async function loadEventsForSelects() {
 async function createEvent(e) {
     e.preventDefault();
     
+    const deadlineInput = document.getElementById('eventTeamDeadline').value;
     const eventData = {
         name: document.getElementById('eventName').value,
         description: document.getElementById('eventDescription').value,
         start_date: document.getElementById('eventStartDate').value || null,
-        end_date: document.getElementById('eventEndDate').value || null
+        end_date: document.getElementById('eventEndDate').value || null,
+        team_deadline: deadlineInput ? new Date(deadlineInput).toISOString() : null
     };
     
     try {
@@ -301,29 +324,6 @@ async function deleteBand(bandId) {
     }
 }
 
-async function createPlayer(e) {
-    e.preventDefault();
-    
-    const playerData = {
-        event_id: document.getElementById('playerEventSelect').value,
-        name: document.getElementById('playerName').value,
-        current_rating: parseInt(document.getElementById('playerRating').value),
-        external_id: document.getElementById('playerExternalId').value || null
-    };
-    
-    try {
-        const { error } = await supabase
-            .from('players')
-            .insert([playerData]);
-            
-        if (error) throw error;
-        
-        showSuccess('Player added successfully!');
-        document.getElementById('playerForm').reset();
-    } catch (error) {
-        showError('Error adding player: ' + error.message);
-    }
-}
 
 async function loadPlayers() {
     const eventId = document.getElementById('playerEventFilter').value;
@@ -527,7 +527,7 @@ async function loadEventDeadlines() {
                         <div class="event-deadline-info">
                             <strong>${event.name}</strong>
                             <div>Start Date: ${event.start_date ? event.start_date : 'Not set'}</div>
-                            <div>Team Deadline: ${event.team_deadline ? new Date(event.team_deadline).toLocaleString('en-US', {timeZone: 'America/New_York'}) + ' EST' : 'Not set'}</div>
+                            <div>Team Deadline: ${event.team_deadline ? new Date(event.team_deadline).toLocaleString('en-US', {timeZoneName: 'short'}) : 'Not set'}</div>
                             <div class="deadline-status ${event.teams_allowed ? 'status-open' : 'status-closed'}">${event.status}</div>
                             ${event.hours_until_deadline !== null ? 
                                 `<div class="time-remaining">${event.hours_until_deadline > 0 ? 
@@ -549,5 +549,109 @@ function showSuccess(message) {
     successDiv.textContent = message;
     successDiv.style.display = 'block';
     setTimeout(() => successDiv.style.display = 'none', 3000);
+}
+
+let currentEditingEventId = null;
+
+async function loadEventForDeadlineEdit() {
+    const eventId = document.getElementById('deadlineEventSelect').value;
+    if (!eventId) return;
+    
+    currentEditingEventId = eventId;
+    
+    try {
+        const { data: event, error } = await supabase
+            .from('events')
+            .select('name, team_deadline')
+            .eq('id', eventId)
+            .single();
+            
+        if (error) throw error;
+        
+        // Show the edit form
+        document.getElementById('deadlineEditContainer').style.display = 'block';
+        
+        // Update timezone display
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        document.getElementById('editTimezone').textContent = timezone;
+        
+        // Set the current deadline if exists
+        if (event.team_deadline) {
+            // Convert to local datetime-local format
+            const date = new Date(event.team_deadline);
+            const localDateTime = date.toISOString().slice(0, 16);
+            document.getElementById('editEventDeadline').value = localDateTime;
+        } else {
+            document.getElementById('editEventDeadline').value = '';
+        }
+        
+        // Set up form submission
+        document.getElementById('deadlineEditForm').onsubmit = updateEventDeadline;
+        
+    } catch (error) {
+        showError('Error loading event: ' + error.message);
+    }
+}
+
+async function updateEventDeadline(e) {
+    e.preventDefault();
+    
+    const deadlineInput = document.getElementById('editEventDeadline').value;
+    
+    try {
+        const { error } = await supabase
+            .from('events')
+            .update({ 
+                team_deadline: deadlineInput ? new Date(deadlineInput).toISOString() : null 
+            })
+            .eq('id', currentEditingEventId);
+            
+        if (error) throw error;
+        
+        showSuccess('Event deadline updated successfully!');
+        cancelDeadlineEdit();
+        loadEventsForSelects();
+        
+        // Refresh deadline status if it's visible
+        const deadlinesContainer = document.getElementById('eventDeadlinesContainer');
+        if (deadlinesContainer.querySelector('.events-deadline-list')) {
+            loadEventDeadlines();
+        }
+        
+    } catch (error) {
+        showError('Error updating deadline: ' + error.message);
+    }
+}
+
+async function clearDeadline() {
+    if (!confirm('Are you sure you want to clear the deadline? This will allow team operations indefinitely.')) return;
+    
+    try {
+        const { error } = await supabase
+            .from('events')
+            .update({ team_deadline: null })
+            .eq('id', currentEditingEventId);
+            
+        if (error) throw error;
+        
+        showSuccess('Event deadline cleared successfully!');
+        cancelDeadlineEdit();
+        loadEventsForSelects();
+        
+        // Refresh deadline status if it's visible
+        const deadlinesContainer = document.getElementById('eventDeadlinesContainer');
+        if (deadlinesContainer.querySelector('.events-deadline-list')) {
+            loadEventDeadlines();
+        }
+        
+    } catch (error) {
+        showError('Error clearing deadline: ' + error.message);
+    }
+}
+
+function cancelDeadlineEdit() {
+    document.getElementById('deadlineEditContainer').style.display = 'none';
+    document.getElementById('editEventDeadline').value = '';
+    currentEditingEventId = null;
 }
 </script>
