@@ -5,7 +5,6 @@ title = 'Scrabble Roto'
 theme = 'PaperMod'
 
 [params]
-env = "development"
 description = "Fantasy Scrabble tournament app"
 author = "Scrabble Roto"
 showReadingTime = false

@@ -82,75 +82,60 @@ async function updateAuthUI(isAuthenticated) {
 
       console.log('Profile loaded:', profile);
 
-      // Show user info
+      // Show user info with smooth transition
       if (authUserInfo && authUserDisplay) {
         authUserDisplay.textContent = `Logged in as ${profile?.username || currentUser.email}`;
+        authUserInfo.className = 'user-info fade-in';
         authUserInfo.style.display = 'flex';
-        console.log('Set authUserInfo to display: flex');
+        console.log('Set authUserInfo to display: flex with fade-in');
       }
 
-      // Hide login menu item
-      if (loginMenu) {
-        loginMenu.style.display = 'none';
-        console.log('Set loginMenu to display: none');
-      }
-
-      // Show create team menu
-      if (createTeamMenu) {
-        createTeamMenu.style.display = 'block';
-        console.log('Set createTeamMenu to display: block');
-      }
-
+      // Hide/show menu items with smooth transitions
+      setMenuItemState(loginMenu, 'hidden-smooth');
+      setMenuItemState(createTeamMenu, 'visible-smooth');
+      
       // Show/hide admin menu based on permissions
-      if (adminMenu) {
-        if (profile?.is_admin) {
-          adminMenu.style.display = 'block';
-          console.log('Set adminMenu to display: block (admin user)');
-        } else {
-          adminMenu.style.display = 'none';
-          console.log('Set adminMenu to display: none (not admin)');
-        }
+      if (profile?.is_admin) {
+        setMenuItemState(adminMenu, 'visible-smooth');
+        console.log('Set adminMenu to visible (admin user)');
+      } else {
+        setMenuItemState(adminMenu, 'hidden-smooth');
+        console.log('Set adminMenu to hidden (not admin)');
       }
 
     } catch (error) {
       console.error("Error loading profile:", error);
       
-      // Fallback - show basic user info
+      // Fallback - show basic user info with smooth transition
       if (authUserInfo && authUserDisplay) {
         authUserDisplay.textContent = `Logged in as ${currentUser.email}`;
+        authUserInfo.className = 'user-info fade-in';
         authUserInfo.style.display = 'flex';
       }
       
-      if (loginMenu) loginMenu.style.display = 'none';
-      if (createTeamMenu) createTeamMenu.style.display = 'block';
-      if (adminMenu) adminMenu.style.display = 'none';
+      setMenuItemState(loginMenu, 'hidden-smooth');
+      setMenuItemState(createTeamMenu, 'visible-smooth');
+      setMenuItemState(adminMenu, 'hidden-smooth');
     }
   } else {
     // User is logged out
-    console.log('Setting logged out state');
+    console.log('Setting logged out state with smooth transitions');
     
-    // Hide user info
+    // Hide user info with fade out
     if (authUserInfo) {
-      authUserInfo.style.display = 'none';
-      console.log('Set authUserInfo to display: none');
+      authUserInfo.className = 'user-info fade-out';
+      setTimeout(() => {
+        if (authUserInfo.classList.contains('fade-out')) {
+          authUserInfo.style.display = 'none';
+        }
+      }, 300);
+      console.log('Set authUserInfo to fade out');
     }
     
-    // Show login menu
-    if (loginMenu) {
-      loginMenu.style.display = 'block';
-      console.log('Set loginMenu to display: block');
-    }
-    
-    // Hide protected menus
-    if (createTeamMenu) {
-      createTeamMenu.style.display = 'none';
-      console.log('Set createTeamMenu to display: none');
-    }
-    
-    if (adminMenu) {
-      adminMenu.style.display = 'none';
-      console.log('Set adminMenu to display: none');
-    }
+    // Show/hide menu items with smooth transitions
+    setMenuItemState(loginMenu, 'visible-smooth');
+    setMenuItemState(createTeamMenu, 'hidden-smooth');
+    setMenuItemState(adminMenu, 'hidden-smooth');
   }
   
   // Reset the flag
@@ -249,7 +234,7 @@ document.addEventListener("DOMContentLoaded", function() {
   setTimeout(() => {
     console.log('Initializing auth UI...');
     
-    // Set initial states - everything starts hidden/visible appropriately
+    // Set initial loading states with smooth transitions
     const authUserInfo = document.getElementById('authUserInfo');
     const loginMenu = document.getElementById('menu-item-login');
     const createTeamMenu = document.getElementById('menu-item-create-team');
@@ -262,13 +247,48 @@ document.addEventListener("DOMContentLoaded", function() {
       adminMenu: !!adminMenu
     });
     
-    // Set default states
-    if (authUserInfo) authUserInfo.style.display = 'none';
-    if (loginMenu) loginMenu.style.display = 'block';
-    if (createTeamMenu) createTeamMenu.style.display = 'none';
-    if (adminMenu) adminMenu.style.display = 'none';
+    // Check for existing auth token to show optimistic state
+    const hasAuthToken = localStorage.getItem('supabase.auth.token') || 
+                        sessionStorage.getItem('supabase.auth.token') ||
+                        document.cookie.includes('sb-access-token') ||
+                        window.location.hash.includes('access_token=');
     
-    // Then check auth
+    if (hasAuthToken) {
+      // Likely logged in - show skeleton loading state
+      if (authUserInfo) {
+        authUserInfo.className = 'user-info skeleton';
+        authUserInfo.innerHTML = '<span></span>'; // Empty skeleton
+      }
+      setMenuItemState(loginMenu, 'hidden-smooth');
+      setMenuItemState(createTeamMenu, 'visible-smooth');
+      setMenuItemState(adminMenu, 'hidden-smooth'); // Will be updated based on admin status
+    } else {
+      // Likely logged out - set logged out state smoothly
+      if (authUserInfo) authUserInfo.className = 'user-info hidden-smooth';
+      setMenuItemState(loginMenu, 'visible-smooth');
+      setMenuItemState(createTeamMenu, 'hidden-smooth');
+      setMenuItemState(adminMenu, 'hidden-smooth');
+    }
+    
+    // Then check actual auth state
     initAuth();
-  }, 100);
+  }, 50); // Reduced delay for faster perceived loading
 });
+
+// Helper function to set menu item states with smooth transitions
+function setMenuItemState(element, state) {
+  if (!element) return;
+  
+  element.className = `auth-dependent ${state}`;
+  
+  // For visibility, also handle display property for accessibility
+  if (state === 'hidden-smooth') {
+    setTimeout(() => {
+      if (element.classList.contains('hidden-smooth')) {
+        element.style.display = 'none';
+      }
+    }, 300); // Match CSS transition duration
+  } else if (state === 'visible-smooth') {
+    element.style.display = 'block';
+  }
+}

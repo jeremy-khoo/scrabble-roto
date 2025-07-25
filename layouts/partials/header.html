@@ -40,7 +40,7 @@
         <div class="logo">
             {{- $label_text := (site.Params.label.text | default site.Title) }}
             {{- if site.Title }}
-            <a href="{{ "" | absLangURL }}" accesskey="h" title="{{ $label_text }} (Alt + H)">
+            <a href="{{ "/" | relURL }}" accesskey="h" title="{{ $label_text }} (Alt + H)">
                 {{- if site.Params.label.icon }}
                 {{- $img := resources.Get site.Params.label.icon }}
                 {{- if $img }}
@@ -123,7 +123,7 @@
                 {{- $menu_item_url := (cond (strings.HasSuffix .URL "/") .URL (printf "%s/" .URL) ) | absLangURL }}
                 {{- $page_url:= $currentPage.Permalink | absLangURL }}
                 {{- $is_search := eq (site.GetPage .KeyName).Layout `search` }}
-                <li id="menu-item-{{ .Name | lower | replaceRE "[^a-z]" "-" }}">
+                <li id="menu-item-{{ .Name | lower | replaceRE "[^a-z]" "-" }}" class="auth-dependent">
                     <a href="{{ .URL | absLangURL }}" title="{{ .Title | default .Name }} {{- cond $is_search (" (Alt + /)" | safeHTMLAttr) ("" | safeHTMLAttr ) }}"
                     {{- cond $is_search (" accesskey=/" | safeHTMLAttr) ("" | safeHTMLAttr ) }}>
                         <span {{- if eq $menu_item_url $page_url }} class="active" {{- end }}>

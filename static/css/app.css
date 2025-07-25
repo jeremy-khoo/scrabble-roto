@@ -1,5 +1,69 @@
 /* Unified CSS for all pages - theme-aware styling */
 
+/* Auth loading states to prevent layout shifts */
+.nav {
+    min-height: 60px; /* Reserve space for nav elements */
+}
+
+.user-info, #menu li {
+    transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+.user-info.loading, #menu li.loading {
+    opacity: 0.5;
+}
+
+.user-info.fade-in, #menu li.fade-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.user-info.fade-out, #menu li.fade-out {
+    opacity: 0;
+    transform: translateY(-5px);
+}
+
+/* Loading skeleton for user info */
+.user-info.skeleton {
+    opacity: 1;
+    background: linear-gradient(90deg, var(--border) 25%, var(--code-bg) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s infinite;
+    border-radius: 4px;
+    height: 32px;
+    width: 150px;
+    display: flex !important;
+}
+
+@keyframes loading-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Menu item loading states */
+#menu li.auth-dependent {
+    min-height: 40px; /* Reserve space */
+}
+
+#menu li.hidden-smooth {
+    opacity: 0;
+    transform: scale(0.95);
+    pointer-events: none;
+    max-height: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+#menu li.visible-smooth {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    max-height: 50px;
+    transition: all 0.3s ease;
+}
+
 /* Global form styling */
 .form-group {
     margin-bottom: 1.5rem;
