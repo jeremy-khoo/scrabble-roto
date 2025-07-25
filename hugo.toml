@@ -18,6 +18,11 @@ url = "/teams/"
 weight = 10
 
 [[menu.main]]
+name = "Stats"
+url = "/stats/"
+weight = 15
+
+[[menu.main]]
 name = "Create Team"
 url = "/create-team/"
 weight = 20
