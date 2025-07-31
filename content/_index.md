@@ -18,8 +18,20 @@ Make sure to send as "Friends and Family" and leave the notes blank.
 ## Rules
 - Teams will be ranked by total wins and then total spread will be used as the tiebreaker.
 - If you choose any finalists, their wins during the finals will count for standings purposes.
-- During the tournament, teams standings will be updated as results become available.
-- Top N teams (to be updated soon, depending on number of entrants) will receive a prize.
+- During the tournament, team standings will be updated as results become available.
+
+## Prizes
+
+Assuming we get 40 total teams, these are the projected prizes:
+
+- 1st - $250
+- 2nd - $160
+- 3rd - $120
+- 4th - $90
+- 5th - $60
+- 6th - $20
+
+Prizes will be adjusted upwards if we get more entrants. Submit your teams!
 
 ## Getting Started
 Click **Teams** to see existing teams or **Create Team** to build your own fantasy roster.
