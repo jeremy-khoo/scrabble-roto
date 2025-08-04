@@ -22,14 +22,15 @@ Make sure to send as "Friends and Family" and leave the notes blank.
 
 ## Prizes
 
-Assuming we get 40 total teams, these are the projected prizes:
+Assuming we get 50 total teams, these are the projected prizes:
 
-- 1st - $250
-- 2nd - $160
-- 3rd - $120
-- 4th - $90
-- 5th - $60
-- 6th - $20
+- 1st - $300
+- 2nd - $200
+- 3rd - $140
+- 4th - $110
+- 5th - $80
+- 6th - $50
+- 7th - $20
 
 Prizes will be adjusted upwards if we get more entrants. Submit your teams!
 
