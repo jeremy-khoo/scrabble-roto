@@ -8,13 +8,13 @@
     "build": "hugo --gc --minify",
     "preview": "hugo server --environment production",
     "sync-players": "node sync-players.js",
+    "find-missing": "node find-missing-players.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.7.0"
   },
-  "devDependencies": {},
   "keywords": [
     "scrabble",
     "fantasy",

@@ -4,9 +4,21 @@
 import { createClient } from "@supabase/supabase-js";
 
 // Configuration - these should be set as environment variables in production
-const TOURNAMENT_BASE_URL =
-  "https://event.scrabbleplayers.org/2024/spc/build/tsh/2024-spc-";
-const DIVISIONS = ["a", "b"]; // Add more divisions as needed
+const TOURNAMENT_CONFIGS = [
+  {
+    baseUrl: "https://event.scrabbleplayers.org/2025/spc/build/tsh/2025-spc-",
+    divisions: ["a", "b"],
+    name: "main",
+    urlPattern: "{baseUrl}{division}/html/tourney.js" // Standard pattern
+  },
+  // Uncomment and update when finals URL is available:
+  // {
+  //   baseUrl: "https://event.scrabbleplayers.org/2025/spc/build/tsh/2025-spc-fi",
+  //   divisions: ["a"], // Finals only for division A, add more divisions as needed  
+  //   name: "finals",
+  //   urlPattern: "{baseUrl}/html/tourney.js" // Finals doesn't use division in URL
+  // }
+];
 const EVENT_ID = 1; // Adjust this to match your event ID
 
 export default {
@@ -71,72 +83,103 @@ async function syncStandings(env) {
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
   );
-  console.log("V2");
-  console.log(`Fetching tournament data for ${DIVISIONS.length} divisions...`);
+  console.log("V3");
+  
+  // Count total divisions across all tournaments
+  const totalDivisions = TOURNAMENT_CONFIGS.reduce((sum, config) => sum + config.divisions.length, 0);
+  console.log(`Fetching tournament data for ${totalDivisions} divisions across ${TOURNAMENT_CONFIGS.length} tournaments...`);
 
-  let allStandings = [];
+  let allStandings = new Map(); // Use Map to aggregate wins by player
   let divisionsProcessed = 0;
   let divisionErrors = 0;
 
-  // Fetch and process each division
-  for (const division of DIVISIONS) {
-    try {
-      const divisionUrl = `${TOURNAMENT_BASE_URL}${division}/html/tourney.js`;
-      console.log(
-        `Fetching division ${division.toUpperCase()} from: ${divisionUrl}`
-      );
+  // Fetch and process each tournament configuration
+  for (const tournamentConfig of TOURNAMENT_CONFIGS) {
+    console.log(`Processing ${tournamentConfig.name} tournament...`);
+    
+    // Fetch and process each division within this tournament
+    for (const division of tournamentConfig.divisions) {
+      try {
+        const divisionUrl = tournamentConfig.urlPattern
+          .replace("{baseUrl}", tournamentConfig.baseUrl)
+          .replace("{division}", division);
+        console.log(
+          `Fetching ${tournamentConfig.name} division ${division.toUpperCase()} from: ${divisionUrl}`
+        );
 
-      const response = await fetch(divisionUrl);
+        const response = await fetch(divisionUrl);
 
-      if (!response.ok) {
-        console.warn(
-          `Division ${division.toUpperCase()} returned status ${
-            response.status
-          }, skipping...`
+        if (!response.ok) {
+          console.warn(
+            `${tournamentConfig.name} division ${division.toUpperCase()} returned status ${
+              response.status
+            }, skipping...`
+          );
+          divisionErrors++;
+          continue;
+        }
+
+        const jsContent = await response.text();
+        const tournamentData = extractNewtData(jsContent);
+
+        console.log(
+          `Extracted tournament data for ${tournamentConfig.name} division ${division.toUpperCase()}`
+        );
+
+        const divisionStandings = calculateStandings(tournamentData, division, tournamentConfig.name);
+        
+        // Aggregate standings by player name (case-insensitive)
+        for (const playerStats of divisionStandings) {
+          const playerKey = playerStats.name.toLowerCase();
+          const existingStats = allStandings.get(playerKey);
+          if (existingStats) {
+            // Add wins/losses/spread from this tournament to existing totals
+            existingStats.wins += playerStats.wins;
+            existingStats.losses += playerStats.losses;
+            existingStats.spread += playerStats.spread;
+            existingStats.games_played += playerStats.games_played;
+            existingStats.tournaments.push(tournamentConfig.name);
+          } else {
+            // First time seeing this player
+            playerStats.tournaments = [tournamentConfig.name];
+            allStandings.set(playerKey, playerStats);
+          }
+        }
+        
+        divisionsProcessed++;
+
+        console.log(
+          `${tournamentConfig.name} division ${division.toUpperCase()}: ${
+            divisionStandings.length
+          } players processed`
+        );
+      } catch (error) {
+        console.error(
+          `Error processing ${tournamentConfig.name} division ${division.toUpperCase()}:`,
+          error
         );
         divisionErrors++;
-        continue;
       }
-
-      const jsContent = await response.text();
-      const tournamentData = extractNewtData(jsContent);
-
-      console.log(
-        `Extracted tournament data for division ${division.toUpperCase()}`
-      );
-
-      const divisionStandings = calculateStandings(tournamentData, division);
-      allStandings = allStandings.concat(divisionStandings);
-      divisionsProcessed++;
-
-      console.log(
-        `Division ${division.toUpperCase()}: ${
-          divisionStandings.length
-        } players processed`
-      );
-    } catch (error) {
-      console.error(
-        `Error processing division ${division.toUpperCase()}:`,
-        error
-      );
-      divisionErrors++;
     }
   }
 
-  if (allStandings.length === 0) {
+  // Convert Map back to array
+  const aggregatedStandings = Array.from(allStandings.values());
+
+  if (aggregatedStandings.length === 0) {
     throw new Error("No standings data retrieved from any division");
   }
 
-  console.log(`Total players across all divisions: ${allStandings.length}`);
+  console.log(`Total players across all divisions: ${aggregatedStandings.length}`);
 
-  const results = await updatePlayerStandings(allStandings, supabase);
+  const results = await updatePlayerStandings(aggregatedStandings, supabase);
 
   return {
     success: true,
     timestamp: new Date().toISOString(),
     divisionsProcessed,
     divisionErrors,
-    totalPlayers: allStandings.length,
+    totalPlayers: aggregatedStandings.length,
     ...results,
   };
 }
@@ -171,7 +214,7 @@ function extractNewtData(jsContent) {
   }
 }
 
-function calculateStandings(tournamentData, divisionCode) {
+function calculateStandings(tournamentData, divisionCode, tournamentName = "main") {
   const standings = [];
 
   // Get the first division (there's only one per file)
@@ -278,9 +321,9 @@ async function updatePlayerStandings(allStandings, supabase) {
 
     console.log(`Found ${existingPlayers.length} existing players in database`);
 
-    // Create lookup map for player names to full player records
+    // Create lookup map for player names to full player records (case-insensitive)
     const playerMap = new Map();
-    existingPlayers.forEach((p) => playerMap.set(p.name, p));
+    existingPlayers.forEach((p) => playerMap.set(p.name.toLowerCase(), p));
 
     // Prepare batch updates
     const updates = [];
@@ -302,7 +345,7 @@ async function updatePlayerStandings(allStandings, supabase) {
         continue;
       }
 
-      const existingPlayer = playerMap.get(playerStats.name);
+      const existingPlayer = playerMap.get(playerStats.name.toLowerCase());
 
       if (existingPlayer) {
         // Create complete player record with existing data + updated tournament stats
