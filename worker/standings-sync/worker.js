@@ -9,15 +9,15 @@ const TOURNAMENT_CONFIGS = [
     baseUrl: "https://event.scrabbleplayers.org/2025/spc/build/tsh/2025-spc-",
     divisions: ["a", "b"],
     name: "main",
-    urlPattern: "{baseUrl}{division}/html/tourney.js" // Standard pattern
+    urlPattern: "{baseUrl}{division}/html/tourney.js", // Standard pattern
   },
   // Uncomment and update when finals URL is available:
-  // {
-  //   baseUrl: "https://event.scrabbleplayers.org/2025/spc/build/tsh/2025-spc-fi",
-  //   divisions: ["a"], // Finals only for division A, add more divisions as needed  
-  //   name: "finals",
-  //   urlPattern: "{baseUrl}/html/tourney.js" // Finals doesn't use division in URL
-  // }
+  {
+    baseUrl: "https://event.scrabbleplayers.org/2025/spc/build/tsh/2025-spc-fi",
+    divisions: ["a"], // Finals only for division A, add more divisions as needed
+    name: "finals",
+    urlPattern: "{baseUrl}/html/tourney.js", // Finals doesn't use division in URL
+  },
 ];
 const EVENT_ID = 1; // Adjust this to match your event ID
 
@@ -84,10 +84,15 @@ async function syncStandings(env) {
     env.SUPABASE_SERVICE_ROLE_KEY
   );
   console.log("V3");
-  
+
   // Count total divisions across all tournaments
-  const totalDivisions = TOURNAMENT_CONFIGS.reduce((sum, config) => sum + config.divisions.length, 0);
-  console.log(`Fetching tournament data for ${totalDivisions} divisions across ${TOURNAMENT_CONFIGS.length} tournaments...`);
+  const totalDivisions = TOURNAMENT_CONFIGS.reduce(
+    (sum, config) => sum + config.divisions.length,
+    0
+  );
+  console.log(
+    `Fetching tournament data for ${totalDivisions} divisions across ${TOURNAMENT_CONFIGS.length} tournaments...`
+  );
 
   let allStandings = new Map(); // Use Map to aggregate wins by player
   let divisionsProcessed = 0;
@@ -96,7 +101,7 @@ async function syncStandings(env) {
   // Fetch and process each tournament configuration
   for (const tournamentConfig of TOURNAMENT_CONFIGS) {
     console.log(`Processing ${tournamentConfig.name} tournament...`);
-    
+
     // Fetch and process each division within this tournament
     for (const division of tournamentConfig.divisions) {
       try {
@@ -104,14 +109,27 @@ async function syncStandings(env) {
           .replace("{baseUrl}", tournamentConfig.baseUrl)
           .replace("{division}", division);
         console.log(
-          `Fetching ${tournamentConfig.name} division ${division.toUpperCase()} from: ${divisionUrl}`
+          `Fetching ${
+            tournamentConfig.name
+          } division ${division.toUpperCase()} from: ${divisionUrl}`
         );
 
-        const response = await fetch(divisionUrl);
+        let response = await fetch(divisionUrl);
+
+        // If HTTPS fails with SSL error (526), try HTTP as fallback
+        if (!response.ok && response.status === 526) {
+          const httpUrl = divisionUrl.replace("https://", "http://");
+          console.warn(
+            `SSL error (526) for ${divisionUrl}, trying HTTP fallback: ${httpUrl}`
+          );
+          response = await fetch(httpUrl);
+        }
 
         if (!response.ok) {
           console.warn(
-            `${tournamentConfig.name} division ${division.toUpperCase()} returned status ${
+            `${
+              tournamentConfig.name
+            } division ${division.toUpperCase()} returned status ${
               response.status
             }, skipping...`
           );
@@ -123,11 +141,17 @@ async function syncStandings(env) {
         const tournamentData = extractNewtData(jsContent);
 
         console.log(
-          `Extracted tournament data for ${tournamentConfig.name} division ${division.toUpperCase()}`
+          `Extracted tournament data for ${
+            tournamentConfig.name
+          } division ${division.toUpperCase()}`
         );
 
-        const divisionStandings = calculateStandings(tournamentData, division, tournamentConfig.name);
-        
+        const divisionStandings = calculateStandings(
+          tournamentData,
+          division,
+          tournamentConfig.name
+        );
+
         // Aggregate standings by player name (case-insensitive)
         for (const playerStats of divisionStandings) {
           const playerKey = playerStats.name.toLowerCase();
@@ -145,7 +169,7 @@ async function syncStandings(env) {
             allStandings.set(playerKey, playerStats);
           }
         }
-        
+
         divisionsProcessed++;
 
         console.log(
@@ -155,7 +179,9 @@ async function syncStandings(env) {
         );
       } catch (error) {
         console.error(
-          `Error processing ${tournamentConfig.name} division ${division.toUpperCase()}:`,
+          `Error processing ${
+            tournamentConfig.name
+          } division ${division.toUpperCase()}:`,
           error
         );
         divisionErrors++;
@@ -170,7 +196,9 @@ async function syncStandings(env) {
     throw new Error("No standings data retrieved from any division");
   }
 
-  console.log(`Total players across all divisions: ${aggregatedStandings.length}`);
+  console.log(
+    `Total players across all divisions: ${aggregatedStandings.length}`
+  );
 
   const results = await updatePlayerStandings(aggregatedStandings, supabase);
 
@@ -214,7 +242,11 @@ function extractNewtData(jsContent) {
   }
 }
 
-function calculateStandings(tournamentData, divisionCode, tournamentName = "main") {
+function calculateStandings(
+  tournamentData,
+  divisionCode,
+  tournamentName = "main"
+) {
   const standings = [];
 
   // Get the first division (there's only one per file)
@@ -257,9 +289,13 @@ function calculateStandings(tournamentData, divisionCode, tournamentName = "main
           playerStats.losses += 1;
           playerStats.spread += myScore;
         } else {
-          // Positive score = bye win
-          playerStats.wins += 1;
-          playerStats.spread += myScore;
+          // Positive score = bye - DON'T count for fantasy standings
+          // Byes don't count as wins or affect spread for fantasy purposes
+          console.log(
+            `Skipping bye for ${player.name} in round ${
+              round + 1
+            } (score: ${myScore})`
+          );
         }
       } else {
         // Regular game - find opponent's score
@@ -312,7 +348,7 @@ async function updatePlayerStandings(allStandings, supabase) {
     // Get all existing players for this event to match against
     const { data: existingPlayers, error: fetchError } = await supabase
       .from("players")
-      .select("*")  // Get all fields so we can preserve them in upsert
+      .select("*") // Get all fields so we can preserve them in upsert
       .eq("event_id", EVENT_ID);
 
     if (fetchError) {
@@ -329,10 +365,15 @@ async function updatePlayerStandings(allStandings, supabase) {
     const updates = [];
     const timestamp = new Date().toISOString();
 
-    console.log(`Processing ${allStandings.length} players from tournament data...`);
-    
+    console.log(
+      `Processing ${allStandings.length} players from tournament data...`
+    );
+
     // Debug: show some existing player names
-    console.log(`First 5 existing players in DB:`, existingPlayers.slice(0, 5).map(p => p.name));
+    console.log(
+      `First 5 existing players in DB:`,
+      existingPlayers.slice(0, 5).map((p) => p.name)
+    );
 
     for (const playerStats of allStandings) {
       // Skip invalid player records
@@ -350,7 +391,7 @@ async function updatePlayerStandings(allStandings, supabase) {
       if (existingPlayer) {
         // Create complete player record with existing data + updated tournament stats
         const updateRecord = {
-          ...existingPlayer,  // All existing fields (name, rating, etc.)
+          ...existingPlayer, // All existing fields (name, rating, etc.)
           tournament_wins: playerStats.wins || 0,
           tournament_losses: playerStats.losses || 0,
           tournament_spread: playerStats.spread || 0,
@@ -361,7 +402,7 @@ async function updatePlayerStandings(allStandings, supabase) {
         // Double-check we have valid data
         if (
           updateRecord.id &&
-          updateRecord.name &&  // Now we have name from existing record
+          updateRecord.name && // Now we have name from existing record
           typeof updateRecord.tournament_wins === "number" &&
           typeof updateRecord.tournament_losses === "number" &&
           typeof updateRecord.tournament_spread === "number" &&
@@ -374,9 +415,9 @@ async function updatePlayerStandings(allStandings, supabase) {
               ? `+${playerStats.spread}`
               : `${playerStats.spread}`;
           console.log(
-            `Will update ${
-              playerStats.name
-            } (ID: ${existingPlayer.id}) (${playerStats.division.toUpperCase()}): ${playerStats.wins}-${
+            `Will update ${playerStats.name} (ID: ${
+              existingPlayer.id
+            }) (${playerStats.division.toUpperCase()}): ${playerStats.wins}-${
               playerStats.losses
             } (${spreadStr})`
           );
@@ -400,13 +441,19 @@ async function updatePlayerStandings(allStandings, supabase) {
     // Debug the updates array before sending to database
     console.log(`Created ${updates.length} update records`);
     console.log(`First few updates:`, updates.slice(0, 3));
-    console.log(`All player IDs in updates:`, updates.map(u => u.id));
-    
+    console.log(
+      `All player IDs in updates:`,
+      updates.map((u) => u.id)
+    );
+
     // Verify all IDs exist in our existing players
-    const existingIds = new Set(existingPlayers.map(p => p.id));
-    const invalidIds = updates.filter(u => !existingIds.has(u.id));
+    const existingIds = new Set(existingPlayers.map((p) => p.id));
+    const invalidIds = updates.filter((u) => !existingIds.has(u.id));
     if (invalidIds.length > 0) {
-      console.error(`Found ${invalidIds.length} updates with invalid player IDs:`, invalidIds);
+      console.error(
+        `Found ${invalidIds.length} updates with invalid player IDs:`,
+        invalidIds
+      );
     }
 
     // Perform updates using individual update queries (safer than upsert)
@@ -415,21 +462,25 @@ async function updatePlayerStandings(allStandings, supabase) {
 
       // Now use upsert with complete player records (all fields included)
       const { data, error } = await supabase
-        .from('players')
+        .from("players")
         .upsert(updates, {
-          onConflict: 'id',
-          ignoreDuplicates: false
+          onConflict: "id",
+          ignoreDuplicates: false,
         })
-        .select('id, name, tournament_wins, tournament_losses, tournament_spread');
+        .select(
+          "id, name, tournament_wins, tournament_losses, tournament_spread"
+        );
 
       if (error) {
-        console.error('Batch upsert error:', error);
+        console.error("Batch upsert error:", error);
         errors += updates.length;
       } else {
         updated = data ? data.length : updates.length;
-        console.log(`Successfully batch upserted ${updated} players with complete records`);
+        console.log(
+          `Successfully batch upserted ${updated} players with complete records`
+        );
       }
-      
+
       console.log(`Successfully updated ${updated} players`);
     }
   } catch (error) {

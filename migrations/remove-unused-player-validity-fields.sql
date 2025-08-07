@@ -1,9 +1,13 @@
 -- Remove unused is_valid and invalid_reason columns from players table
 -- These fields were added but never used - validity is properly tracked at the team level
 
--- Drop trigger and function that use these fields
+-- Drop triggers that use these fields
 DROP TRIGGER IF EXISTS check_player_validity_trigger ON players;
+DROP TRIGGER IF EXISTS update_player_validity_trigger ON players;
+
+-- Drop functions that use these fields
 DROP FUNCTION IF EXISTS check_player_validity();
+DROP FUNCTION IF EXISTS update_player_validity();
 
 -- Drop the unused columns
 ALTER TABLE players 
