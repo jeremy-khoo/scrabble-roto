@@ -24,20 +24,33 @@ function parsePlayerData(text) {
       continue;
     }
 
-    // Check for division header: "Division 1", "Division 2", etc.
-    const divisionMatch = line.match(/^Division\s+(\d+)/i);
+    // Check for division header: "Division 1", "Division 2", "Division A", "Division B", etc.
+    const divisionMatch = line.match(/^Division\s+([A-Z\d]+)/i);
     if (divisionMatch) {
-      const divisionNumber = parseInt(divisionMatch[1]);
+      const divisionId = divisionMatch[1].toUpperCase();
+      
+      // Map letter divisions to numbers: A->1, B->2, or keep numeric divisions
+      let divisionNumber;
+      if (divisionId === 'A') {
+        divisionNumber = 1;
+      } else if (divisionId === 'B') {
+        divisionNumber = 2;
+      } else if (/^\d+$/.test(divisionId)) {
+        divisionNumber = parseInt(divisionId);
+      } else {
+        // For C, D, etc.: C->3, D->4
+        divisionNumber = divisionId.charCodeAt(0) - 64; // A=65, so A->1, B->2, C->3
+      }
       
       // Stop if we've reached beyond MAX_DIVISIONS
       if (divisionNumber > MAX_DIVISIONS) {
-        console.log(`Reached Division ${divisionNumber}, stopping at MAX_DIVISIONS=${MAX_DIVISIONS}`);
+        console.log(`Reached Division ${divisionId} (${divisionNumber}), stopping at MAX_DIVISIONS=${MAX_DIVISIONS}`);
         break;
       }
       
-      // Map Division 1 -> 'a', Division 2 -> 'b', etc.
-      currentDivision = String.fromCharCode(96 + divisionNumber); // 97 = 'a'
-      console.log(`\nFound division header: Division ${divisionNumber} -> '${currentDivision}'`);
+      // Keep division as numeric (1, 2, etc.)
+      currentDivision = divisionNumber;
+      console.log(`\nFound division header: Division ${divisionId} -> ${divisionNumber}`);
       continue;
     }
 
@@ -80,15 +93,15 @@ async function findMissingPlayers() {
     const crossTablesPlayers = parsePlayerData(text);
     
     console.log(`\nParsed ${crossTablesPlayers.length} players from Cross-Tables`);
-    console.log(`Division A: ${crossTablesPlayers.filter(p => p.division === 'a').length} players`);
-    console.log(`Division B: ${crossTablesPlayers.filter(p => p.division === 'b').length} players`);
+    console.log(`Division 1: ${crossTablesPlayers.filter(p => p.division === 1).length} players`);
+    console.log(`Division 2: ${crossTablesPlayers.filter(p => p.division === 2).length} players`);
     
     // Step 2: Fetch all players from Supabase
     console.log(`\nFetching existing players from Supabase (event_id=${EVENT_ID})...`);
     
     const { data: supabasePlayers, error } = await supabase
       .from('players')
-      .select('name, current_rating, current_division')
+      .select('name, current_rating, current_division, dropped_out')
       .eq('event_id', EVENT_ID);
     
     if (error) {
@@ -117,13 +130,13 @@ async function findMissingPlayers() {
       
       // Group by division for better readability
       const missingByDivision = {
-        'a': missingPlayers.filter(p => p.division === 'a'),
-        'b': missingPlayers.filter(p => p.division === 'b')
+        1: missingPlayers.filter(p => p.division === 1),
+        2: missingPlayers.filter(p => p.division === 2)
       };
       
       for (const [division, players] of Object.entries(missingByDivision)) {
         if (players.length > 0) {
-          console.log(`Division ${division.toUpperCase()} (${players.length} missing):`);
+          console.log(`Division ${division} (${players.length} missing):`);
           console.log("-".repeat(40));
           
           players.forEach(player => {
@@ -150,6 +163,36 @@ async function findMissingPlayers() {
     if (extraInSupabase.length > 0) {
       console.log(`\nNote: ${extraInSupabase.length} players exist in Supabase but not in Cross-Tables`);
       console.log("(These might be players who withdrew or were removed from the tournament)");
+      
+      console.log("\nPlayers in Supabase but NOT in Cross-Tables:");
+      console.log("-".repeat(40));
+      
+      // Group by division for consistency - handle both formats (1/2 or a/b)
+      const extraByDivision = {};
+      
+      extraInSupabase.forEach(player => {
+        // Convert numeric divisions to letters if needed
+        let divKey = player.current_division;
+        if (typeof divKey === 'number' || /^\d+$/.test(divKey)) {
+          divKey = String.fromCharCode(96 + parseInt(divKey)); // 1 -> 'a', 2 -> 'b'
+        }
+        if (!extraByDivision[divKey]) {
+          extraByDivision[divKey] = [];
+        }
+        extraByDivision[divKey].push(player);
+      });
+      
+      for (const [division, players] of Object.entries(extraByDivision)) {
+        if (players.length > 0) {
+          const divLabel = division.match(/^\d+$/) ? division : division.toUpperCase();
+          console.log(`Division ${divLabel} (${players.length} extra):`);
+          players.forEach(player => {
+            const droppedMark = player.dropped_out ? ' [DROPPED]' : '';
+            console.log(`  ${player.name.padEnd(30)} ${player.current_rating}${droppedMark}`);
+          });
+          console.log("");
+        }
+      }
     }
     
   } catch (error) {

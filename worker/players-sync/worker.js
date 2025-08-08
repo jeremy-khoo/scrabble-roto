@@ -7,6 +7,7 @@ const CROSS_TABLES_URL =
   "https://www.cross-tables.com/entrants.php?u=16463&text=1";
 const EVENT_ID = 1; // Adjust this to match your event ID
 const MAX_DIVISIONS = 2; // Only process first 2 divisions
+const FREEZE_RATINGS = true; // Set to true to prevent rating updates (e.g., before tournament)
 
 export default {
   async fetch(request, env, ctx) {
@@ -72,6 +73,11 @@ async function syncPlayers(env) {
   );
 
   console.log("Fetching player data from Cross-Tables...");
+  if (FREEZE_RATINGS) {
+    console.log(
+      "⚠️ RATINGS FREEZE MODE ENABLED - ratings will not be updated for existing players"
+    );
+  }
 
   // Fetch data from Cross-Tables
   const response = await fetch(CROSS_TABLES_URL);
@@ -106,20 +112,37 @@ function parsePlayerData(text) {
       continue;
     }
 
-    // Check for division header: "Division 1", "Division 2", etc.
-    const divisionMatch = line.match(/^Division\s+(\d+)/i);
+    // Check for division header: "Division 1", "Division 2", "Division A", "Division B", etc.
+    const divisionMatch = line.match(/^Division\s+([A-Z\d]+)/i);
     if (divisionMatch) {
-      const divisionNumber = parseInt(divisionMatch[1]);
+      const divisionId = divisionMatch[1].toUpperCase();
       
+      // Map letter divisions to numbers: A->1, B->2, or keep numeric divisions
+      let divisionNumber;
+      if (divisionId === 'A') {
+        divisionNumber = 1;
+      } else if (divisionId === 'B') {
+        divisionNumber = 2;
+      } else if (/^\d+$/.test(divisionId)) {
+        divisionNumber = parseInt(divisionId);
+      } else {
+        // For C, D, etc.: C->3, D->4
+        divisionNumber = divisionId.charCodeAt(0) - 64; // A=65, so A->1, B->2, C->3
+      }
+
       // Stop if we've reached beyond MAX_DIVISIONS
       if (divisionNumber > MAX_DIVISIONS) {
-        console.log(`Reached Division ${divisionNumber}, stopping at MAX_DIVISIONS=${MAX_DIVISIONS}`);
+        console.log(
+          `Reached Division ${divisionId} (${divisionNumber}), stopping at MAX_DIVISIONS=${MAX_DIVISIONS}`
+        );
         break;
       }
-      
-      // Map Division 1 -> 'a', Division 2 -> 'b', etc.
-      currentDivision = String.fromCharCode(96 + divisionNumber); // 97 = 'a'
-      console.log(`Found division header: Division ${divisionNumber} -> '${currentDivision}'`);
+
+      // Keep division as numeric (1, 2, etc.)
+      currentDivision = divisionNumber;
+      console.log(
+        `Found division header: Division ${divisionId} -> ${divisionNumber}`
+      );
       continue;
     }
 
@@ -174,7 +197,9 @@ async function createPlayers(players, supabase) {
 
   // Create lookup map for faster comparison (case-insensitive)
   const existingPlayerMap = new Map();
-  existingPlayers.forEach((p) => existingPlayerMap.set(p.name.toLowerCase(), p));
+  existingPlayers.forEach((p) =>
+    existingPlayerMap.set(p.name.toLowerCase(), p)
+  );
 
   // Step 2: Separate players into new vs existing that need updates
   const newPlayers = [];
@@ -199,28 +224,44 @@ async function createPlayers(players, supabase) {
       );
     } else {
       // Check if existing player needs update
-      const needsUpdate =
-        existing.current_rating !== player.rating ||
-        existing.current_division !== player.division;
+      let needsUpdate = false;
+      const changes = [];
+
+      // Always check division changes
+      if (existing.current_division !== player.division) {
+        needsUpdate = true;
+        changes.push(
+          `division ${existing.current_division} → ${player.division}`
+        );
+      }
+
+      // Only check rating if not frozen
+      if (!FREEZE_RATINGS && existing.current_rating !== player.rating) {
+        needsUpdate = true;
+        changes.push(`rating ${existing.current_rating} → ${player.rating}`);
+      } else if (FREEZE_RATINGS && existing.current_rating !== player.rating) {
+        // Log what would have been updated
+        console.log(
+          `[FROZEN] Would update ${player.name}: rating ${existing.current_rating} → ${player.rating}`
+        );
+      }
 
       if (needsUpdate) {
-        const changes = [];
-        if (existing.current_rating !== player.rating) {
-          changes.push(`rating ${existing.current_rating} → ${player.rating}`);
-        }
-        if (existing.current_division !== player.division) {
-          changes.push(
-            `division ${existing.current_division} → ${player.division}`
-          );
-        }
-
-        playersToUpdate.push({
+        const updateData = {
           id: existing.id,
           name: player.name,
-          current_rating: player.rating,
           current_division: player.division,
           updated_at: new Date().toISOString(),
-        });
+        };
+
+        // Only update rating if not frozen
+        if (!FREEZE_RATINGS) {
+          updateData.current_rating = player.rating;
+        } else {
+          updateData.current_rating = existing.current_rating; // Keep existing rating
+        }
+
+        playersToUpdate.push(updateData);
         console.log(`Will update ${player.name}: ${changes.join(", ")}`);
       } else {
         console.log(`${player.name} unchanged`);
@@ -293,9 +334,44 @@ async function createPlayers(players, supabase) {
     }
   }
 
-  console.log(
-    `Finished: ${created} created, ${updated} updated, ${unchanged} unchanged, ${errors} errors`
+  // Step 5: Detect dropouts - players in database but not in Cross-Tables
+  let dropouts = 0;
+  const crossTablesNames = new Set(players.map((p) => p.name.toLowerCase()));
+  const droppedPlayers = existingPlayers.filter(
+    (p) => !crossTablesNames.has(p.name.toLowerCase()) && !p.dropped_out
   );
 
-  return { created, updated, unchanged, errors };
+  if (droppedPlayers.length > 0) {
+    console.log(
+      `Detected ${droppedPlayers.length} dropouts, marking as dropped_out...`
+    );
+
+    for (const droppedPlayer of droppedPlayers) {
+      console.log(`Marking ${droppedPlayer.name} as dropped out`);
+
+      const { error: dropoutError } = await supabase
+        .from("players")
+        .update({
+          dropped_out: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", droppedPlayer.id);
+
+      if (dropoutError) {
+        console.error(
+          `Error marking ${droppedPlayer.name} as dropped out:`,
+          dropoutError
+        );
+        errors++;
+      } else {
+        dropouts++;
+      }
+    }
+  }
+
+  console.log(
+    `Finished: ${created} created, ${updated} updated, ${unchanged} unchanged, ${dropouts} dropouts, ${errors} errors`
+  );
+
+  return { created, updated, unchanged, dropouts, errors };
 }
