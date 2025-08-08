@@ -19,18 +19,20 @@ Make sure to send as "Friends and Family" and leave the notes blank.
 - Teams will be ranked by total wins and then total spread will be used as the tiebreaker.
 - If you choose any finalists, their wins during the finals will count for standings purposes.
 - During the tournament, team standings will be updated as results become available.
+- The NASC Early Bird does not affect rating bands. All rating bands will be frozen immediately before the rating bands.
 
 ## Prizes
 
-Assuming we get 50 total teams, these are the projected prizes:
+Assuming we get 60 total teams, these are the projected prizes:
 
-- 1st - $300
-- 2nd - $200
-- 3rd - $140
-- 4th - $110
-- 5th - $80
-- 6th - $50
-- 7th - $20
+1st - $350
+2nd - $240
+3rd - $160
+4th - $120
+5th - $90
+6th - $65
+7th - $45
+8th - $20
 
 Prizes will be adjusted upwards if we get more entrants. Submit your teams!
 
