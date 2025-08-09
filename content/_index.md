@@ -23,18 +23,20 @@ Make sure to send as "Friends and Family" and leave the notes blank.
 
 ## Prizes
 
-Assuming we get 60 total teams, these are the projected prizes:
+With 72 teams:
 
-1st - $350
-2nd - $240
-3rd - $160
-4th - $120
-5th - $90
-6th - $65
-7th - $45
-8th - $20
+| Place | Prize |
+|-------|-------|
+| 1st   | $400  |
+| 2nd   | $260  |
+| 3rd   | $190  |
+| 4th   | $140  |
+| 5th   | $110  |
+| 6th   | $85   |
+| 7th   | $65   |
+| 8th   | $40   |
+| 9th   | $20   |
 
-Prizes will be adjusted upwards if we get more entrants. Submit your teams!
 
 ## Getting Started
 Click **Teams** to see existing teams or **Create Team** to build your own fantasy roster.

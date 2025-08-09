@@ -401,6 +401,7 @@ async function loadAllTeams() {
                             <br><span class="paid-status">Payment Status: <strong>${team.paid ? 'PAID' : 'UNPAID'}</strong></span>
                         </div>
                         <div class="team-actions">
+                            <button onclick="window.location.href='/edit-team/?id=${team.id}'" class="primary">Edit Team</button>
                             <button onclick="togglePaidStatus(${team.id}, ${!team.paid})" class="${team.paid ? 'warning' : 'success'}">
                                 ${team.paid ? 'Mark Unpaid' : 'Mark Paid'}
                             </button>
