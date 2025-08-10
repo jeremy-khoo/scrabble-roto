@@ -14,6 +14,8 @@ title = 'Teams'
     <p>Loading teams...</p>
 </div>
 
+Note: There are some technical difficulties with the Nationals scoreboard data. The standings below are not yet accurate. Please sit tight.
+
 <script>
 document.addEventListener('DOMContentLoaded', async function() {
     // Load teams with standings data
@@ -30,16 +32,16 @@ document.addEventListener('DOMContentLoaded', async function() {
                 )
             `)
             .order('created_at', { ascending: false });
-        
+
         if (error) throw error;
-        
+
         // Get standings data for all teams
         const { data: standings, error: standingsError } = await supabase
             .from('team_standings')
             .select('*');
-        
+
         if (standingsError) throw standingsError;
-        
+
         // Merge standings data with team data
         teams.forEach(team => {
             const teamStandings = standings.find(s => s.id === team.id);
@@ -56,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 team.total_games = 0;
             }
         });
-        
+
         // Sort by standings (wins desc, spread desc)
         teams.sort((a, b) => {
             if (b.total_wins !== a.total_wins) {
@@ -90,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 function updateLastUpdateTime(teams) {
     const lastUpdateElement = document.getElementById('lastUpdate');
-    
+
     // Find the most recent update time across all teams
     let mostRecentUpdate = null;
     teams.forEach(team => {
@@ -101,7 +103,7 @@ function updateLastUpdateTime(teams) {
             }
         }
     });
-    
+
     if (mostRecentUpdate) {
         lastUpdateElement.textContent = mostRecentUpdate.toLocaleString();
     } else {
@@ -111,7 +113,7 @@ function updateLastUpdateTime(teams) {
 
 function displayTeams(teams) {
     const container = document.getElementById('teamsContainer');
-    
+
     if (!teams || teams.length === 0) {
         container.innerHTML = '<p>No teams created yet. <a href="/create-team/">Create the first team!</a></p>';
         return;
@@ -119,13 +121,13 @@ function displayTeams(teams) {
 
     // Show all teams in standings order (no separation by user)
     let html = '<div class="teams-standings">';
-    
+
     teams.forEach((team, index) => {
         const isOwner = currentUser && team.user_id === currentUser.id;
         const rank = index + 1;
         html += generateTeamCardWithStandings(team, isOwner, rank);
     });
-    
+
     html += '</div>';
     container.innerHTML = html;
 }
@@ -135,7 +137,7 @@ function generateTeamCardWithStandings(team, isOwner, rank) {
         const player = tp.players;
         const isInvalid = player.dropped_out || player.current_rating_band_id !== tp.drafted_rating_band_id || player.current_division !== tp.drafted_division;
         const invalidClass = isInvalid ? ' class="invalid-player"' : '';
-        
+
         // Get the invalid reason
         let invalidReason = '';
         if (player.dropped_out) {
@@ -145,18 +147,18 @@ function generateTeamCardWithStandings(team, isOwner, rank) {
         } else if (player.current_rating_band_id !== tp.drafted_rating_band_id) {
             invalidReason = `Player moved from drafted rating band (now ${player.current_rating})`;
         }
-        
+
         const invalidTitle = invalidReason ? ` title="${invalidReason}"` : '';
-        
+
         // Format tournament record: wins and spread
         const wins = player.tournament_wins || 0;
         const spread = player.tournament_spread || 0;
         const spreadStr = spread >= 0 ? `+${spread}` : `${spread}`;
         const record = `${wins} ${spreadStr}`;
-        
+
         // Add an indicator for invalid players
         const invalidIndicator = isInvalid ? '<span class="invalid-indicator" title="' + invalidReason + '">⚠️</span>' : '';
-        
+
         return `<tr${invalidClass}${invalidTitle}>
             <td><strong>${player.name}</strong>${invalidIndicator}</td>
             <td class="player-division">${tp.rating_bands.name}</td>
@@ -164,21 +166,21 @@ function generateTeamCardWithStandings(team, isOwner, rank) {
         </tr>`;
     }).join('');
 
-    const validityBadge = !team.is_valid ? 
+    const validityBadge = !team.is_valid ?
         '<span class="badge invalid">Invalid</span>' : '';
 
-    const paidBadge = team.paid ? 
-        '<span class="badge paid">Paid</span>' : 
+    const paidBadge = team.paid ?
+        '<span class="badge paid">Paid</span>' :
         '<span class="badge tentative">Tentative</span>';
 
-    const editButton = isOwner ? 
+    const editButton = isOwner ?
         `<button onclick="window.location.href='/edit-team/?id=${team.id}'" class="edit-btn">Edit</button>` : '';
 
     // Format standings with proper +/- for spread
     const winsDisplay = team.total_wins || 0;
     const lossesDisplay = team.total_losses || 0;
     const spreadDisplay = team.total_spread >= 0 ? `+${team.total_spread}` : `${team.total_spread}`;
-    
+
     return `
         <div class="team-card compact ${isOwner ? 'own-team' : ''}">
             <div class="team-header">
