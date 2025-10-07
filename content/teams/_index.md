@@ -14,7 +14,7 @@ title = 'Teams'
     <p>Loading teams...</p>
 </div>
 
-Note: There are some technical difficulties with the Nationals scoreboard data. The standings below are not yet accurate. Please sit tight.
+Note: Results may not be updating promptly.
 
 <script>
 document.addEventListener('DOMContentLoaded', async function() {

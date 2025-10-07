@@ -11,13 +11,6 @@ const TOURNAMENT_CONFIGS = [
     name: "main",
     urlPattern: "{baseUrl}{division}/html/tourney.js", // Standard pattern
   },
-  // Uncomment and update when finals URL is available:
-  {
-    baseUrl: "https://event.scrabbleplayers.org/2025/spc/build/tsh/2025-spc-fi",
-    divisions: ["a"], // Finals only for division A, add more divisions as needed
-    name: "finals",
-    urlPattern: "{baseUrl}/html/tourney.js", // Finals doesn't use division in URL
-  },
 ];
 const EVENT_ID = 1; // Adjust this to match your event ID
 

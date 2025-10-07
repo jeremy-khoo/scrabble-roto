@@ -12,19 +12,18 @@ The TO Autocar Bangkok International is the spiritual successor to the Brand's C
 ## How it works
 - Register/login above
 - Browse existing teams and create your own
-- Pay 250THB/SGD10/USD7.5 to Jeremy K after creating a team. 
-    - You can also pay him cash in Bangkok
 - You can only create one team. **If you are playing in this event, you have to pick yourself for the rating band you belong to.**
-- Deadline for creating a team - **Saturday, October 11, 2025, at 10:30:00 AM Bangkok Time (UCT+7)**.
+- Deadline for creating a team - **Saturday, October 11, 2025, at 1.30PM Bangkok Time (UCT+7)**.
+- Pay 500THB/SGD20/USD15 to Jeremy Khoo after creating a team. (You can pay after the deadline, just pay by Saturday.)
+    - Acceptable payment methods: Cash in Bangkok (preferred), PayNow (if you have my number), Wise (@jeremyk310), and Venmo (@Jeremy-Khoo).
 
 ## Rules
 - Teams will be ranked by total wins and then total spread will be used as the tiebreaker.
-- If you choose any finalists, their wins during the finals will count for standings purposes.
 - During the tournament, team standings will be updated as results become available.
 
 ## Prizes
 
-TBA. All entry fees will be returned as prizes.
+TBA. All entry fees will be returned as prizes. There will also be some sponsored prizes.
 
 <!--
 With 72 teams:
