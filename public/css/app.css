@@ -1,0 +1,1332 @@
+/* Unified CSS for all pages - theme-aware styling */
+
+/* Auth loading states to prevent layout shifts */
+.nav {
+    min-height: 60px; /* Reserve space for nav elements */
+}
+
+.user-info, #menu li {
+    transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+.user-info.loading, #menu li.loading {
+    opacity: 0.5;
+}
+
+.user-info.fade-in, #menu li.fade-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.user-info.fade-out, #menu li.fade-out {
+    opacity: 0;
+    transform: translateY(-5px);
+}
+
+/* Loading skeleton for user info */
+.user-info.skeleton {
+    opacity: 1;
+    background: linear-gradient(90deg, var(--border) 25%, var(--code-bg) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s infinite;
+    border-radius: 4px;
+    height: 32px;
+    width: 150px;
+    display: flex !important;
+}
+
+@keyframes loading-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Menu item loading states */
+#menu li.auth-dependent {
+    min-height: 40px; /* Reserve space */
+}
+
+#menu li.hidden-smooth {
+    opacity: 0;
+    transform: scale(0.95);
+    pointer-events: none;
+    max-height: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+#menu li.visible-smooth {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    max-height: 50px;
+    transition: all 0.3s ease;
+}
+
+/* Global form styling */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: var(--content);
+}
+
+.form-group input, 
+.form-group select,
+.form-row input, 
+.form-row select {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.75rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: var(--theme);
+    color: var(--content);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-group input:focus, 
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.form-group select:hover,
+.form-row select:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Team standings styling */
+.standings-info {
+    background: var(--code-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary);
+}
+
+.teams-standings {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Enhanced team card styling with rank badge */
+.team-card.compact {
+    position: relative;
+    background: var(--theme);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.team-card.compact:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary);
+}
+
+.team-card.compact.own-team {
+    background: linear-gradient(135deg, var(--theme) 0%, var(--code-bg) 100%);
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+
+.team-rank-badge {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: var(--primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.team-rank-badge .rank-number {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.team-tournament-standings {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--border);
+    background: var(--code-bg);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.standings-header {
+    margin-bottom: 0.5rem;
+    color: var(--content);
+}
+
+.standings-stats {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.standings-stats span {
+    color: var(--content);
+    font-size: 0.9rem;
+}
+
+.standings-stats .wins strong,
+.standings-stats .spread strong {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.team-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: var(--secondary);
+}
+
+.team-actions {
+    margin-top: 0.75rem;
+}
+
+.edit-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.edit-btn:hover {
+    background: var(--primary-dark, #0056b3);
+    transform: translateY(-1px);
+}
+
+/* Responsive design for standings */
+@media (max-width: 768px) {
+    .team-rank-badge {
+        position: static;
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
+    
+    .standings-stats {
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .team-meta {
+        justify-content: center;
+        width: 100%;
+    }
+}
+
+/* Player table styling */
+.players-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+}
+
+.players-table td {
+    padding: 0.25rem 0.5rem;
+    border: none;
+    vertical-align: top;
+}
+
+.players-table td:first-child {
+    padding-left: 0;
+}
+
+.players-table td:last-child {
+    text-align: right;
+}
+
+.player-division {
+    color: var(--secondary);
+    opacity: 0.7;
+    font-size: 0.9em;
+}
+
+.player-record {
+    font-family: 'Courier New', monospace;
+    font-size: 0.95em;
+    white-space: nowrap;
+}
+
+/* Beautiful select dropdown styling */
+.form-group select,
+.rating-band-selection select {
+    background: linear-gradient(135deg, var(--theme) 0%, var(--code-bg) 100%);
+    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 40px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.form-group select option,
+.rating-band-selection select option {
+    padding: 0.75rem;
+    background-color: var(--theme);
+    color: var(--content);
+    border: none;
+}
+
+.form-group select option:hover,
+.rating-band-selection select option:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+/* Invalid state styling */
+.form-group select:invalid,
+.rating-band-selection select:invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+}
+
+.form-group select:invalid:focus,
+.rating-band-selection select:invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3);
+}
+
+/* Dark mode specific fixes */
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group select,
+[data-theme="dark"] .form-row input,
+[data-theme="dark"] .form-row select {
+    background-color: var(--code-bg);
+    border-color: var(--border);
+    color: var(--content);
+}
+
+[data-theme="dark"] .form-group input::placeholder {
+    color: var(--tertiary);
+}
+
+/* Container styling */
+#createTeamContainer {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+#adminContainer,
+#teamsContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Button styling - exclude theme toggle buttons */
+button:not([class*="theme"]):not([aria-label*="theme"]):not([title*="theme"]):not(.theme-toggle) {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0.5rem 0.25rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+button:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+button:disabled {
+    background: linear-gradient(135deg, #6c757d 0%, #545862 100%);
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Danger/Delete buttons */
+button.danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+}
+
+button.danger:hover {
+    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* Success/Create buttons */
+button.success,
+button[type="submit"] {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+button.success:hover,
+button[type="submit"]:hover {
+    background: linear-gradient(135deg, #1e7e34 0%, #155724 100%);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* Secondary buttons */
+button.secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #545862 100%);
+    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
+}
+
+button.secondary:hover {
+    background: linear-gradient(135deg, #545862 0%, #383d41 100%);
+    box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+/* Warning buttons */
+button.warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    color: #212529;
+    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.2);
+}
+
+button.warning:hover {
+    background: linear-gradient(135deg, #e0a800 0%, #d39e00 100%);
+    box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+}
+
+/* Admin specific button overrides */
+#adminContainer button {
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    margin: 0.25rem;
+}
+
+/* Load buttons */
+button[onclick*="load"],
+button[onclick*="Load"] {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    box-shadow: 0 2px 4px rgba(23, 162, 184, 0.2);
+}
+
+button[onclick*="load"]:hover,
+button[onclick*="Load"]:hover {
+    background: linear-gradient(135deg, #138496 0%, #0f6674 100%);
+    box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+}
+
+/* Edit buttons */
+button[onclick*="edit"],
+button[onclick*="Edit"] {
+    background: linear-gradient(135deg, #6f42c1 0%, #59359a 100%);
+    box-shadow: 0 2px 4px rgba(111, 66, 193, 0.2);
+}
+
+button[onclick*="edit"]:hover,
+button[onclick*="Edit"]:hover {
+    background: linear-gradient(135deg, #59359a 0%, #4c2c85 100%);
+    box-shadow: 0 4px 8px rgba(111, 66, 193, 0.3);
+}
+
+/* Toggle buttons (admin/user toggles) */
+button[onclick*="toggle"],
+button[onclick*="Toggle"] {
+    background: linear-gradient(135deg, #fd7e14 0%, #e8590c 100%);
+    box-shadow: 0 2px 4px rgba(253, 126, 20, 0.2);
+}
+
+button[onclick*="toggle"]:hover,
+button[onclick*="Toggle"]:hover {
+    background: linear-gradient(135deg, #e8590c 0%, #d54309 100%);
+    box-shadow: 0 4px 8px rgba(253, 126, 20, 0.3);
+}
+
+/* Card styling for teams */
+.team-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: var(--code-bg);
+}
+
+.team-card h3 {
+    margin-top: 0;
+    color: var(--content);
+}
+
+.team-card p {
+    color: var(--content);
+}
+
+.team-card ul {
+    margin: 0.5rem 0;
+}
+
+/* Compact team card styling */
+.team-card.compact {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.team-card.compact .team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.team-card.compact .team-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.team-card.compact .team-badges {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.team-card.compact .team-info {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.team-card.compact .team-meta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.team-card.compact .team-meta span {
+    color: var(--content);
+}
+
+.team-card.compact .team-players {
+    color: var(--content);
+    margin-bottom: 0.5rem;
+}
+
+.team-card.compact .players-list {
+    margin-top: 0.25rem;
+}
+
+.team-card.compact .players-list > div {
+    font-size: 0.85rem;
+    line-height: 1.3;
+    margin-bottom: 0.1rem;
+    color: var(--content);
+}
+
+.team-card.compact .players-list .invalid-player {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Invalid player styling for table rows */
+.players-table tr.invalid-player td {
+    color: #dc3545;
+}
+
+.players-table tr.invalid-player:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Invalid player indicator */
+.invalid-indicator {
+    margin-left: 0.25rem;
+    cursor: help;
+    font-size: 0.9em;
+    vertical-align: middle;
+}
+
+.invalid-indicator:hover {
+    filter: brightness(1.2);
+}
+
+.team-card.compact .team-actions {
+    margin-top: 0.5rem;
+}
+
+.team-card.compact .edit-btn {
+    background: linear-gradient(135deg, #6f42c1 0%, #59359a 100%);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.team-card.compact .edit-btn:hover {
+    background: linear-gradient(135deg, #59359a 0%, #4c2c85 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(111, 66, 193, 0.3);
+}
+
+/* Badge styling */
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: inline-block;
+    margin: 0 0.25rem;
+}
+
+.badge.valid {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.badge.invalid {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.badge.paid {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.badge.tentative {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* Rating band selection styling */
+.rating-band-selection {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--theme) 0%, var(--code-bg) 100%);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.rating-band-selection:hover {
+    border-color: var(--primary);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.rating-band-selection.invalid {
+    border-color: #dc3545;
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, var(--code-bg) 100%);
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.rating-band-selection h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--content);
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rating-band-selection h3::before {
+    content: "🎯";
+    font-size: 1.1rem;
+}
+
+.rating-band-selection select {
+    margin-top: 0.75rem;
+    width: 100%;
+    max-width: none;
+    padding: 0.75rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: linear-gradient(135deg, var(--theme) 0%, var(--code-bg) 100%);
+    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 40px;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--content);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.rating-band-selection select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.rating-band-selection select:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.rating-band-selection.completed {
+    border-color: #28a745;
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, var(--code-bg) 100%);
+}
+
+.rating-band-selection.completed h3::before {
+    content: "✅";
+}
+
+/* Admin panel styling */
+.tab-btn {
+    background: linear-gradient(135deg, var(--theme) 0%, var(--code-bg) 100%);
+    border: 2px solid var(--border);
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--content);
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab-btn:hover {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border-color: #007bff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    color: white;
+    border-color: #28a745;
+    box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+}
+
+.tab-content {
+    display: none;
+    padding: 2rem 0;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.section {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--code-bg);
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.form-row input, .form-row select {
+    flex: 1;
+}
+
+.band-item, .player-item, .team-item, .user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    background-color: var(--theme);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-item .user-info {
+    flex: 1;
+    padding-right: 1rem;
+    line-height: 1.6;
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.user-item .user-identity {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-item .user-identity strong {
+    color: var(--content);
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.user-item .user-identity div {
+    color: var(--content);
+}
+
+.user-item .user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.user-item .user-details div {
+    color: var(--content);
+}
+
+.user-item .user-details div.admin-yes {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.user-item .user-details small {
+    color: var(--tertiary);
+    font-size: 0.9rem;
+}
+
+.user-item .user-actions {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.player-item.inactive, .team-item.invalid {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-color: rgba(220, 53, 69, 0.3);
+}
+
+.invalid-badge {
+    color: #e53e3e;
+    font-weight: bold;
+}
+
+.paid-status {
+    color: var(--content);
+}
+
+.paid-status strong {
+    color: var(--content);
+}
+
+/* Message styling */
+.success-message {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+}
+
+.error-message {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+}
+
+/* Fix dark mode toggle button globally - remove all outlines and borders */
+.theme-toggle,
+button[aria-label*="theme"],
+button[class*="theme"],
+#theme-toggle,
+.theme-switch,
+[data-theme-toggle],
+.header #theme-toggle,
+.header .theme-toggle,
+button[title*="Theme"],
+button[title*="theme"] {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0.5rem !important;
+    margin: 0 !important;
+    background-color: transparent !important;
+    border-radius: 0 !important;
+    vertical-align: middle !important;
+    align-self: center !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: auto !important;
+    line-height: 1 !important;
+}
+
+.theme-toggle:focus,
+button[aria-label*="theme"]:focus,
+button[class*="theme"]:focus,
+#theme-toggle:focus,
+.theme-switch:focus,
+[data-theme-toggle]:focus,
+.header #theme-toggle:focus,
+.header .theme-toggle:focus,
+button[title*="Theme"]:focus,
+button[title*="theme"]:focus {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    background-color: transparent !important;
+}
+
+.theme-toggle:hover,
+button[aria-label*="theme"]:hover,
+button[class*="theme"]:hover,
+#theme-toggle:hover,
+.theme-switch:hover,
+[data-theme-toggle]:hover,
+.header #theme-toggle:hover,
+.header .theme-toggle:hover,
+button[title*="Theme"]:hover,
+button[title*="theme"]:hover {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    background-color: transparent !important;
+}
+
+
+/* Fix header alignment for theme toggle */
+.header,
+.header-wrapper,
+nav,
+.navigation {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.header .menu,
+nav .menu,
+.navigation .menu {
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Ensure proper text colors in dark mode */
+[data-theme="dark"] {
+    color: var(--content);
+}
+
+[data-theme="dark"] .team-card,
+[data-theme="dark"] .section,
+[data-theme="dark"] .rating-band-selection {
+    background-color: var(--code-bg);
+    border-color: var(--border);
+}
+
+[data-theme="dark"] .band-item,
+[data-theme="dark"] .player-item,
+[data-theme="dark"] .team-item,
+[data-theme="dark"] .user-item {
+    background-color: var(--theme);
+    border-color: var(--border);
+    color: var(--content);
+}
+
+/* Event deadline status styling */
+.event-deadline-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    background-color: var(--theme);
+}
+
+.event-deadline-item.deadline-open {
+    border-color: #28a745;
+    background-color: rgba(40, 167, 69, 0.05);
+}
+
+.event-deadline-item.deadline-passed {
+    border-color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+.event-deadline-info {
+    flex: 1;
+    line-height: 1.6;
+}
+
+.event-deadline-info strong {
+    display: block;
+    color: var(--content);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.event-deadline-info div {
+    color: var(--content);
+    margin-bottom: 0.25rem;
+}
+
+.deadline-status {
+    font-weight: bold;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+    margin: 0.25rem 0;
+}
+
+.deadline-status.status-open {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.deadline-status.status-closed {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.time-remaining {
+    font-style: italic;
+    color: var(--tertiary);
+    font-size: 0.9rem;
+}
+
+.deadline-message {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.deadline-message h3 {
+    color: #721c24;
+    margin-bottom: 1rem;
+}
+
+.deadline-message p {
+    margin-bottom: 0.5rem;
+}
+
+/* Header layout fixes */
+.header {
+    padding: 0 var(--gap);
+    background: var(--theme);
+    border-bottom: 1px solid var(--border);
+    position: relative; /* Enable absolute positioning for mobile menu */
+}
+
+.nav {
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center !important;
+    max-width: 1200px; /* Expand page width */
+    margin: 0 auto;
+    line-height: var(--header-height);
+    padding: 0 1rem;
+}
+
+.logo {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: inherit;
+    margin: auto 0 auto var(--gap);
+}
+
+.logo a {
+    font-size: 24px;
+    font-weight: 700;
+    display: flex !important;
+    align-items: center !important;
+    line-height: var(--header-height);
+}
+
+.logo-switches {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 8px;
+    height: var(--header-height);
+}
+
+/* Theme toggle specific fixes */
+.logo-switches button#theme-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 20px;
+    margin: 0 4px !important;
+    padding: 8px !important;
+    height: auto !important;
+    vertical-align: middle !important;
+    border: none !important;
+    background: transparent !important;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.logo-switches button#theme-toggle:hover {
+    background-color: var(--border) !important;
+}
+
+/* Menu styling fixes */
+#menu {
+    display: flex !important;
+    align-items: center !important;
+    list-style: none;
+    margin: auto var(--gap) auto 0;
+    word-break: keep-all;
+    overflow-x: auto;
+    white-space: nowrap;
+    height: var(--header-height);
+}
+
+#menu li {
+    display: flex;
+    align-items: center !important;
+    height: var(--header-height);
+}
+
+/* Allow JavaScript to override display */
+#menu li[style*="display: none"] {
+    display: none !important;
+}
+
+#menu li[style*="display: block"] {
+    display: flex !important;
+}
+
+#menu li + li {
+    margin-inline-start: var(--gap);
+}
+
+#menu a {
+    font-size: 16px;
+    display: flex !important;
+    align-items: center !important;
+    height: var(--header-height);
+    padding: 0 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+#menu a:hover {
+    background-color: var(--border);
+}
+
+/* Aggressively disable ALL active styling that causes phantom rectangle */
+#menu .active,
+#menu span.active,
+#menu a .active,
+.nav #menu .active {
+    font-weight: normal !important;
+    border-bottom: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    outline: none !important;
+}
+
+/* User info and logout positioning fixes */
+.user-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem;
+    height: var(--header-height);
+    font-size: 14px;
+    color: var(--content);
+    margin-left: auto; /* Push to the right */
+}
+
+/* Simple user info visibility control */
+.user-info[style*="display: none"] {
+    display: none !important;
+}
+
+.user-info[style*="display: flex"] {
+    display: flex !important;
+}
+
+.user-info .logout-btn {
+    background: transparent !important;
+    color: var(--content) !important;
+    padding: 0.5rem 0.8rem !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+    font-size: 0.9rem !important;
+    font-weight: normal !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    margin: 0 !important;
+    height: auto !important;
+    line-height: 1 !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+}
+
+.user-info .logout-btn:hover {
+    background: var(--border) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Burger menu for mobile */
+.mobile-menu-toggle {
+    display: none;
+    background: transparent !important;
+    border: none !important;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--content);
+    padding: 8px !important;
+    margin: 0 !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .nav {
+        max-width: 100%;
+        padding: 0 0.5rem;
+    }
+    
+    .mobile-menu-toggle {
+        display: block !important;
+    }
+    
+    #menu {
+        display: none !important;
+        position: fixed;
+        top: var(--header-height, 60px);
+        left: 0;
+        right: 0;
+        background: var(--theme);
+        border-top: 1px solid var(--border);
+        flex-direction: column !important;
+        align-items: stretch !important;
+        height: auto !important;
+        margin: 0;
+        padding: 1rem 0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        z-index: 9999;
+        max-height: calc(100vh - var(--header-height, 60px));
+        overflow-y: auto;
+    }
+    
+    #menu.mobile-open {
+        display: flex !important;
+    }
+    
+    #menu li {
+        height: auto !important;
+        margin: 0 !important;
+    }
+    
+    #menu li + li {
+        margin-inline-start: 0;
+    }
+    
+    #menu a {
+        height: auto !important;
+        padding: 1rem 2rem;
+        border-radius: 0;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .logo a {
+        font-size: 20px;
+    }
+    
+    .user-info {
+        font-size: 12px;
+        gap: 0.5rem;
+    }
+    
+    .user-info .logout-btn {
+        padding: 0.3rem 0.6rem !important;
+        font-size: 0.7rem !important;
+    }
+    
+    #createTeamContainer,
+    #adminContainer,
+    #teamsContainer {
+        margin: 0 1rem;
+    }
+    
+    .form-group input, 
+    .form-group select {
+        max-width: 100%;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* FINAL OVERRIDE - Must be at end of file to have highest priority */
+#menu .active,
+#menu span.active,
+span.active,
+.active {
+    font-weight: 500 !important; /* Keep the bold text */
+    border-bottom: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    outline: none !important;
+    height: auto !important;
+    line-height: inherit !important;
+    /* Simple color change instead of underline */
+    color: #28a745 !important; /* Green color for active/current state */
+}
