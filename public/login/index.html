@@ -5,23 +5,53 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="noindex, nofollow">
-<title>Stats | Scrabble Roto</title>
+<title>Login | Scrabble Roto</title>
 <meta name="keywords" content="">
-<meta name="description" content="Player Pick Statistics
-
-    Showing player pick rates across all teams for each rating band in the active event.
-    Last updated: Loading...
-
-
-    Loading statistics...
-
-
+<meta name="description" content="
+    Sign In
     
+        
+            Email:
+            
+        
+        
+            Password:
+            
+        
+        
+        Sign In
+    
+    Don&#39;t have an account? Sign up
 
 
+    Create Account
+    
+        
+            Your Name:
+            
+            
+                Please use your real name to help other players identify you
+            
+        
+        
+            Email:
+            
+        
+        
+            Password:
+            
+        
+        
+            Confirm Password:
+            
+        
+        
+        Create Account
+    
+    Already have an account? Sign in
 ">
 <meta name="author" content="Scrabble Roto">
-<link rel="canonical" href="//localhost:1313/stats/">
+<link rel="canonical" href="//localhost:1313/login/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.ae3d277e69647c027e65dd7c785748f912a9be2d37da0061b9ff15a5d7fafb7b.css" integrity="sha256-rj0nfmlkfAJ&#43;Zd18eFdI&#43;RKpvi032gBhuf8Vpdf6&#43;3s=" rel="preload stylesheet" as="style">
 <link rel="icon" href="//localhost:1313/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="//localhost:1313/favicon-16x16.png">
@@ -30,8 +60,8 @@
 <link rel="mask-icon" href="//localhost:1313/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="//localhost:1313/stats/index.xml">
-<link rel="alternate" hreflang="en" href="//localhost:1313/stats/">
+<link rel="alternate" type="application/rss+xml" href="//localhost:1313/login/index.xml">
+<link rel="alternate" hreflang="en" href="//localhost:1313/login/">
 <noscript>
     <style>
         #theme-toggle,
@@ -121,7 +151,7 @@
                 </li>
                 <li id="menu-item-stats" class="auth-dependent">
                     <a href="//localhost:1313/stats/" title="Stats">
-                        <span class="active">Stats</span>
+                        <span>Stats</span>
                     </a>
                 </li>
                 <li id="menu-item-create-team" class="auth-dependent">
@@ -136,7 +166,7 @@
                 </li>
                 <li id="menu-item-login" class="auth-dependent">
                     <a href="//localhost:1313/login/" title="Login">
-                        <span>Login</span>
+                        <span class="active">Login</span>
                     </a>
                 </li>
             </ul>
@@ -175,277 +205,100 @@ async function handleLogout() {
     }
 }
 
-</script><main class="main"> 
-<header class="page-header">
-  <h1>
-    Stats
-  </h1>
-</header>
-<div class="post-content"><h1 id="player-pick-statistics">Player Pick Statistics<a hidden class="anchor" aria-hidden="true" href="#player-pick-statistics">#</a></h1>
-<div class="stats-info">
-    <p>Showing player pick rates across all teams for each rating band in the active event.</p>
-    <p>Last updated: <span id="lastUpdate">Loading...</span></p>
+</script><main class="main">
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">Login</h1>
+  </header>
+  <div class="post-content">
+    <div id="loginSection">
+    <h2>Sign In</h2>
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="loginEmail">Email:</label>
+            <input type="email" id="loginEmail" required>
+        </div>
+        <div class="form-group">
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" required>
+        </div>
+        <div id="loginError" class="error-message" style="display: none;"></div>
+        <button type="submit">Sign In</button>
+    </form>
+    <p><a href="#" id="showSignup">Don't have an account? Sign up</a></p>
 </div>
-<div id="loadingMessage" class="loading-message">
-    <p>Loading statistics...</p>
+<div id="signupSection" style="display: none;">
+    <h2>Create Account</h2>
+    <form id="signupForm">
+        <div class="form-group">
+            <label for="username">Your Name:</label>
+            <input type="text" id="username" required placeholder="Enter your real name">
+            <small style="color: var(--secondary); font-size: 0.85rem; margin-top: 0.25rem; display: block;">
+                Please use your real name to help other players identify you
+            </small>
+        </div>
+        <div class="form-group">
+            <label for="signupEmail">Email:</label>
+            <input type="email" id="signupEmail" required>
+        </div>
+        <div class="form-group">
+            <label for="signupPassword">Password:</label>
+            <input type="password" id="signupPassword" required>
+        </div>
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" required>
+        </div>
+        <div id="signupError" class="error-message" style="display: none;"></div>
+        <button type="submit">Create Account</button>
+    </form>
+    <p><a href="#" id="showLogin">Already have an account? Sign in</a></p>
 </div>
-<div id="statsContainer" class="stats-container" style="display: none;">
-    <!-- Charts will be dynamically inserted here -->
-</div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', async function() {
-    try {
-        // Get active event
-        const { data: activeEvent, error: eventError } = await supabase
-            .from('events')
-            .select('id, name')
-            .eq('is_active', true)
-            .single();
-            
-        if (eventError) throw eventError;
-        
-        // Get all teams for the active event with their players
-        const { data: teams, error: teamsError } = await supabase
-            .from('teams')
-            .select(`
-                id,
-                name,
-                team_players(
-                    player_id,
-                    drafted_rating_band_id,
-                    players(id, name),
-                    rating_bands!team_players_drafted_rating_band_id_fkey(id, name, division)
-                )
-            `)
-            .eq('event_id', activeEvent.id);
-            
-        if (teamsError) throw teamsError;
-        
-        // Get all rating bands for the event
-        const { data: ratingBands, error: bandsError } = await supabase
-            .from('rating_bands')
-            .select('id, name, division')
-            .eq('event_id', activeEvent.id)
-            .order('division')
-            .order('min_rating', { ascending: false });
-            
-        if (bandsError) throw bandsError;
-        
-        // Process the data
-        const pickStats = processPickStatistics(teams, ratingBands);
-        
-        // Update last update time
-        document.getElementById('lastUpdate').textContent = new Date().toLocaleString();
-        
-        // Display the charts
-        displayCharts(pickStats, ratingBands);
-        
-        // Hide loading, show container
-        document.getElementById('loadingMessage').style.display = 'none';
-        document.getElementById('statsContainer').style.display = 'grid';
-        
-    } catch (error) {
-        console.error('Error loading statistics:', error);
-        document.getElementById('loadingMessage').innerHTML = '<p class="error">Error loading statistics. Please try again later.</p>';
-    }
-});
 
-function processPickStatistics(teams, ratingBands) {
-    const stats = {};
-    
-    // Initialize stats for each rating band
-    ratingBands.forEach(band => {
-        stats[band.id] = {
-            bandName: band.name,
-            division: band.division,
-            players: {}
-        };
-    });
-    
-    // Count picks for each player
-    teams.forEach(team => {
-        team.team_players.forEach(tp => {
-            if (tp.players && tp.drafted_rating_band_id) {
-                const bandId = tp.drafted_rating_band_id;
-                const playerName = tp.players.name;
-                
-                if (!stats[bandId].players[playerName]) {
-                    stats[bandId].players[playerName] = 0;
-                }
-                stats[bandId].players[playerName]++;
-            }
-        });
-    });
-    
-    return stats;
-}
+  </div>
+</article>
 
-function displayCharts(pickStats, ratingBands) {
-    const container = document.getElementById('statsContainer');
-    container.innerHTML = '';
-    
-    // Create a chart for each rating band
-    ratingBands.forEach(band => {
-        const bandStats = pickStats[band.id];
-        const playerNames = Object.keys(bandStats.players);
-        
-        // Skip if no players picked in this band
-        if (playerNames.length === 0) {
-            return;
-        }
-        
-        // Create chart container
-        const chartDiv = document.createElement('div');
-        chartDiv.className = 'chart-container';
-        
-        const title = document.createElement('h3');
-        title.textContent = `${bandStats.bandName} (Division ${bandStats.division})`;
-        chartDiv.appendChild(title);
-        
-        const canvas = document.createElement('canvas');
-        canvas.id = `chart-${band.id}`;
-        chartDiv.appendChild(canvas);
-        
-        // Add pick count details
-        const details = document.createElement('div');
-        details.className = 'chart-details';
-        const sortedPlayers = playerNames.sort((a, b) => bandStats.players[b] - bandStats.players[a]);
-        details.innerHTML = '<h4>Pick Counts:</h4><ul>' + 
-            sortedPlayers.map(player => `<li>${player}: ${bandStats.players[player]} picks</li>`).join('') +
-            '</ul>';
-        chartDiv.appendChild(details);
-        
-        container.appendChild(chartDiv);
-        
-        // Create the chart
-        const ctx = canvas.getContext('2d');
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: playerNames,
-                datasets: [{
-                    data: playerNames.map(name => bandStats.players[name]),
-                    backgroundColor: generateColors(playerNames.length),
-                    borderWidth: 1,
-                    borderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 10,
-                            font: {
-                                size: 11
-                            }
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = context.parsed;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((value / total) * 100).toFixed(1);
-                                return `${label}: ${value} picks (${percentage}%)`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    });
-}
-
-function generateColors(count) {
-    const colors = [];
-    const hueStep = 360 / count;
-    
-    for (let i = 0; i < count; i++) {
-        const hue = i * hueStep;
-        colors.push(`hsl(${hue}, 70%, 60%)`);
-    }
-    
-    return colors;
-}
-</script>
 <style>
-.stats-info {
+ 
+#signupSection, #loginSection {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--theme) 0%, var(--code-bg) 100%);
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+#signupSection h2, #loginSection h2 {
     text-align: center;
     margin-bottom: 2rem;
+    color: var(--content);
+    font-size: 1.5rem;
+    font-weight: 600;
 }
 
-.loading-message {
-    text-align: center;
-    padding: 2rem;
-}
-
-.stats-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
-}
-
-.chart-container {
-    background: var(--theme);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.chart-container h3 {
-    text-align: center;
-    margin-bottom: 1rem;
+#signupSection a, #loginSection a {
     color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
 }
 
-.chart-container canvas {
-    max-height: 300px;
+#signupSection a:hover, #loginSection a:hover {
+    text-decoration: underline;
 }
 
-.chart-details {
+#signupSection p, #loginSection p {
+    text-align: center;
     margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
-}
-
-.chart-details h4 {
-    margin-bottom: 0.5rem;
-}
-
-.chart-details ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    font-size: 0.9em;
-}
-
-.chart-details li {
-    padding: 0.25rem 0;
-}
-
-.error {
-    color: var(--error, #d32f2f);
-}
-
-@media (max-width: 768px) {
-    .stats-container {
-        grid-template-columns: 1fr;
-    }
-    
-    .chart-container {
-        padding: 1rem;
-    }
+    color: var(--content);
 }
 </style>
 
-</div>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/auth.js"></script>
+
     </main>
     
 <footer class="footer">

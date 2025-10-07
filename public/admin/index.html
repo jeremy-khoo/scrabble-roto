@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin Panel | Scrabble Roto</title>
+<meta name="keywords" content="">
+<meta name="description" content="
+    
+        Events & Rating Bands
+        Players
+        Teams
+        Users
+    
+
+    
+    
+        Events Management
+        
+        
+            Create New Event
+            
+                
+                    
+                    
+                
+                
+                    
+                    
+                
+                
+                    
+                        Team Deadline (optional):
+                        
+                    
+                    Your timezone: 
+                
+                Create Event
+            
+        
+
+        
+            Event Deadline Status
+            Check Deadlines
+            
+                Click &#34;Check Deadlines&#34; to view team creation status
+            
+        
+
+        
+            Edit Event Deadlines
+            
+                
+                    Select Event to Edit Deadline...
+                
+                Edit Deadline
+            
+            
+                
+                    
+                        
+                            Team Deadline:
+                            
+                        
+                        Your timezone: 
+                    
+                    
+                        Update Deadline
+                        Clear Deadline
+                        Cancel
+                    
+                
+            
+        
+
+        
+            Rating Bands
+            
+                
+                    Select Event...
+                
+                Load Bands
+            
+            
+            
+                Select an event to manage rating bands">
+<meta name="author" content="Scrabble Roto">
+<link rel="canonical" href="//localhost:1313/admin/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.ae3d277e69647c027e65dd7c785748f912a9be2d37da0061b9ff15a5d7fafb7b.css" integrity="sha256-rj0nfmlkfAJ&#43;Zd18eFdI&#43;RKpvi032gBhuf8Vpdf6&#43;3s=" rel="preload stylesheet" as="style">
+<link rel="icon" href="//localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="//localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="//localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="//localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="//localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="//localhost:1313/admin/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<link rel="stylesheet" href="/css/app.css">
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="/" accesskey="h" title="Scrabble Roto (Alt + H)">Scrabble Roto</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        
+        <ul id="menu">
+                <li id="menu-item-teams" class="auth-dependent">
+                    <a href="//localhost:1313/teams/" title="Teams">
+                        <span>Teams</span>
+                    </a>
+                </li>
+                <li id="menu-item-stats" class="auth-dependent">
+                    <a href="//localhost:1313/stats/" title="Stats">
+                        <span>Stats</span>
+                    </a>
+                </li>
+                <li id="menu-item-create-team" class="auth-dependent">
+                    <a href="//localhost:1313/create-team/" title="Create Team">
+                        <span>Create Team</span>
+                    </a>
+                </li>
+                <li id="menu-item-admin" class="auth-dependent">
+                    <a href="//localhost:1313/admin/" title="Admin">
+                        <span class="active">Admin</span>
+                    </a>
+                </li>
+                <li id="menu-item-login" class="auth-dependent">
+                    <a href="//localhost:1313/login/" title="Login">
+                        <span>Login</span>
+                    </a>
+                </li>
+            </ul>
+
+        
+        <div class="user-info" id="authUserInfo" style="display: none;">
+            <span id="authUserDisplay"></span>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+
+        
+        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu">
+            ☰
+        </button>
+    </nav>
+</header>
+
+<script>
+
+function toggleMobileMenu() {
+    const menu = document.getElementById('menu');
+    menu.classList.toggle('mobile-open');
+}
+
+
+async function handleLogout() {
+    try {
+        if (typeof logout === 'function') {
+            await logout();
+        } else {
+            window.location.href = '/login/';
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        window.location.href = '/login/';
+    }
+}
+
+</script><main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">
+      Admin Panel
+    </h1>
+  </header>
+  <div class="post-meta"><span title='2025-07-19 21:01:46 -0400 -0400'>July 19, 2025</span>&nbsp;·&nbsp;Scrabble Roto
+</div> 
+
+  <div class="post-content">
+<div id="adminContainer">
+    <div id="adminTabs">
+        <button class="tab-btn active" onclick="showTab('events')">Events & Rating Bands</button>
+        <button class="tab-btn" onclick="showTab('players')">Players</button>
+        <button class="tab-btn" onclick="showTab('teams')">Teams</button>
+        <button class="tab-btn" onclick="showTab('users')">Users</button>
+    </div>
+
+    <!-- Events & Rating Bands Tab -->
+    <div id="eventsTab" class="tab-content active">
+        <h2>Events Management</h2>
+        
+        <div class="section">
+            <h3>Create New Event</h3>
+            <form id="eventForm">
+                <div class="form-row">
+                    <input type="text" id="eventName" placeholder="Event Name" required>
+                    <input type="text" id="eventDescription" placeholder="Description">
+                </div>
+                <div class="form-row">
+                    <input type="date" id="eventStartDate">
+                    <input type="date" id="eventEndDate">
+                </div>
+                <div class="form-row">
+                    <label for="eventTeamDeadline" style="display: flex; align-items: center; gap: 0.5rem;">
+                        Team Deadline (optional):
+                        <input type="datetime-local" id="eventTeamDeadline" style="flex: 1;">
+                    </label>
+                    <small style="color: #666; margin-left: 0.5rem;">Your timezone: <span id="createTimezone"></span></small>
+                </div>
+                <button type="submit">Create Event</button>
+            </form>
+        </div>
+
+        <div class="section">
+            <h3>Event Deadline Status</h3>
+            <button onclick="loadEventDeadlines()">Check Deadlines</button>
+            <div id="eventDeadlinesContainer">
+                <p>Click "Check Deadlines" to view team creation status</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Edit Event Deadlines</h3>
+            <div class="form-row">
+                <select id="deadlineEventSelect">
+                    <option value="">Select Event to Edit Deadline...</option>
+                </select>
+                <button onclick="loadEventForDeadlineEdit()">Edit Deadline</button>
+            </div>
+            <div id="deadlineEditContainer" style="display: none;">
+                <form id="deadlineEditForm">
+                    <div class="form-row">
+                        <label for="editEventDeadline" style="display: flex; align-items: center; gap: 0.5rem;">
+                            Team Deadline:
+                            <input type="datetime-local" id="editEventDeadline" style="flex: 1;">
+                        </label>
+                        <small style="color: #666; margin-left: 0.5rem;">Your timezone: <span id="editTimezone"></span></small>
+                    </div>
+                    <div class="form-row">
+                        <button type="submit">Update Deadline</button>
+                        <button type="button" onclick="clearDeadline()">Clear Deadline</button>
+                        <button type="button" onclick="cancelDeadlineEdit()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Rating Bands</h3>
+            <div class="form-row">
+                <select id="eventSelect">
+                    <option value="">Select Event...</option>
+                </select>
+                <button onclick="loadRatingBands()">Load Bands</button>
+            </div>
+            
+            <div id="ratingBandsContainer">
+                <p>Select an event to manage rating bands</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Players Tab -->
+    <div id="playersTab" class="tab-content">
+        <h2>Players Management</h2>
+        
+        <div class="section">
+            <h3>Player Data</h3>
+            <p class="info-note">Player data is automatically synced from external APIs. Use the sync-players script to update player information.</p>
+            <div class="form-row">
+                <select id="playerEventFilter">
+                    <option value="">Select Event...</option>
+                </select>
+                <button onclick="loadPlayers()">Load Players</button>
+            </div>
+            <div id="playersContainer">
+                <p>Select an event to view players</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teams Tab -->
+    <div id="teamsTab" class="tab-content">
+        <h2>Teams Management</h2>
+        <div class="section">
+            <h3>All Teams</h3>
+            <button onclick="loadAllTeams()">Load All Teams</button>
+            <div id="adminTeamsContainer">
+                <p>Click "Load All Teams" to view</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Tab -->
+    <div id="usersTab" class="tab-content">
+        <h2>Users Management</h2>
+        <div class="section">
+            <h3>All Users</h3>
+            <button onclick="loadUsers()">Load Users</button>
+            <div id="usersContainer">
+                <p>Click "Load Users" to view</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="adminError" class="error-message" style="display: none;"></div>
+<div id="adminSuccess" class="success-message" style="display: none;"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    // Check if user is admin
+    if (!(await requireAuth())) {
+        return;
+    }
+    
+    checkAdminAccess();
+    loadEventsForSelects();
+    
+    // Show current timezone
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const timezoneElements = document.querySelectorAll('#createTimezone, #editTimezone');
+    timezoneElements.forEach(el => el.textContent = timezone);
+    
+    // Form submissions
+    document.getElementById('eventForm').addEventListener('submit', createEvent);
+});
+
+async function checkAdminAccess() {
+    try {
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', currentUser.id)
+            .single();
+            
+        if (error || !profile?.is_admin) {
+            document.getElementById('adminContainer').innerHTML = 
+                '<h2>Access Denied</h2><p>You do not have admin privileges.</p>';
+            return;
+        }
+    } catch (error) {
+        console.error('Error checking admin access:', error);
+        document.getElementById('adminContainer').innerHTML = 
+            '<h2>Error</h2><p>Could not verify admin access.</p>';
+    }
+}
+
+function showTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById(tabName + 'Tab').classList.add('active');
+    event.target.classList.add('active');
+}
+
+async function loadEventsForSelects() {
+    try {
+        const { data: events, error } = await supabase
+            .from('event_deadline_status')
+            .select('*')
+            .order('created_at', { ascending: false });
+            
+        if (error) throw error;
+        
+        const selects = ['eventSelect', 'playerEventFilter', 'deadlineEventSelect'];
+        selects.forEach(selectId => {
+            const select = document.getElementById(selectId);
+            // Clear existing options except first
+            select.innerHTML = select.innerHTML.split('</option>')[0] + '</option>';
+            
+            events.forEach(event => {
+                const option = document.createElement('option');
+                option.value = event.id;
+                option.textContent = `${event.name} ${!event.teams_allowed ? '(CLOSED)' : ''}`;
+                select.appendChild(option);
+            });
+        });
+    } catch (error) {
+        showError('Error loading events: ' + error.message);
+    }
+}
+
+async function createEvent(e) {
+    e.preventDefault();
+    
+    const deadlineInput = document.getElementById('eventTeamDeadline').value;
+    const eventData = {
+        name: document.getElementById('eventName').value,
+        description: document.getElementById('eventDescription').value,
+        start_date: document.getElementById('eventStartDate').value || null,
+        end_date: document.getElementById('eventEndDate').value || null,
+        team_deadline: deadlineInput ? new Date(deadlineInput).toISOString() : null
+    };
+    
+    try {
+        const { error } = await supabase
+            .from('events')
+            .insert([eventData]);
+            
+        if (error) throw error;
+        
+        showSuccess('Event created successfully!');
+        document.getElementById('eventForm').reset();
+        loadEventsForSelects();
+    } catch (error) {
+        showError('Error creating event: ' + error.message);
+    }
+}
+
+async function loadRatingBands() {
+    const eventId = document.getElementById('eventSelect').value;
+    if (!eventId) return;
+    
+    try {
+        const { data: bands, error } = await supabase
+            .from('rating_bands')
+            .select('*')
+            .eq('event_id', eventId)
+            .order('min_rating', { ascending: false });
+            
+        if (error) throw error;
+        
+        const container = document.getElementById('ratingBandsContainer');
+        container.innerHTML = `
+            <h4>Rating Bands for Selected Event</h4>
+            <form id="bandForm">
+                <div class="form-row">
+                    <input type="text" id="bandName" placeholder="Band Name" required>
+                    <input type="number" id="bandMinRating" placeholder="Min Rating" required>
+                    <input type="number" id="bandMaxRating" placeholder="Max Rating" required>
+                    <button type="submit">Add Band</button>
+                </div>
+            </form>
+            <div class="bands-list">
+                ${bands.map(band => `
+                    <div class="band-item">
+                        <span>${band.name}: ${band.min_rating}-${band.max_rating}</span>
+                        <button onclick="deleteBand(${band.id})">Delete</button>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        
+        document.getElementById('bandForm').addEventListener('submit', createRatingBand);
+    } catch (error) {
+        showError('Error loading rating bands: ' + error.message);
+    }
+}
+
+async function createRatingBand(e) {
+    e.preventDefault();
+    
+    const eventId = document.getElementById('eventSelect').value;
+    const bandData = {
+        event_id: eventId,
+        name: document.getElementById('bandName').value,
+        min_rating: parseInt(document.getElementById('bandMinRating').value),
+        max_rating: parseInt(document.getElementById('bandMaxRating').value)
+    };
+    
+    try {
+        const { error } = await supabase
+            .from('rating_bands')
+            .insert([bandData]);
+            
+        if (error) throw error;
+        
+        showSuccess('Rating band created successfully!');
+        loadRatingBands(); // Reload the bands
+    } catch (error) {
+        showError('Error creating rating band: ' + error.message);
+    }
+}
+
+async function deleteBand(bandId) {
+    if (!confirm('Are you sure? This will affect teams using this rating band.')) return;
+    
+    try {
+        const { error } = await supabase
+            .from('rating_bands')
+            .delete()
+            .eq('id', bandId);
+            
+        if (error) throw error;
+        
+        showSuccess('Rating band deleted successfully!');
+        loadRatingBands();
+    } catch (error) {
+        showError('Error deleting rating band: ' + error.message);
+    }
+}
+
+
+async function loadPlayers() {
+    const eventId = document.getElementById('playerEventFilter').value;
+    if (!eventId) return;
+    
+    try {
+        const { data: players, error } = await supabase
+            .from('players')
+            .select(`
+                *,
+                rating_bands!players_current_rating_band_id_fkey(name)
+            `)
+            .eq('event_id', eventId)
+            .order('name');
+            
+        if (error) throw error;
+        
+        const container = document.getElementById('playersContainer');
+        container.innerHTML = `
+            <div class="players-list">
+                ${players.map(player => `
+                    <div class="player-item ${!player.is_active ? 'inactive' : ''}">
+                        <div class="player-info">
+                            <strong>${player.name}</strong> - ${player.current_rating} 
+                            (${player.rating_bands?.name || 'No band'})
+                            ${player.dropped_out ? ' - DROPPED' : ''}
+                            ${!player.is_active ? ' - INACTIVE' : ''}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch (error) {
+        showError('Error loading players: ' + error.message);
+    }
+}
+
+
+async function loadAllTeams() {
+    try {
+        const { data: teams, error } = await supabase
+            .from('teams')
+            .select(`
+                *,
+                events(name)
+            `)
+            .order('created_at', { ascending: false });
+            
+        if (error) throw error;
+
+        // Get usernames for team creators
+        const userIds = [...new Set(teams.map(team => team.user_id))];
+        const { data: usernames } = await supabase
+            .from('public_profiles')
+            .select('id, username')
+            .in('id', userIds);
+
+        // Add usernames to teams
+        teams.forEach(team => {
+            const user = usernames?.find(u => u.id === team.user_id);
+            team.creator_username = user?.username || 'Unknown';
+        });
+        
+        const container = document.getElementById('adminTeamsContainer');
+        container.innerHTML = `
+            <div class="teams-list">
+                ${teams.map(team => `
+                    <div class="team-item ${!team.is_valid ? 'invalid' : ''}">
+                        <div class="team-info">
+                            <strong>${team.name}</strong> by ${team.creator_username}
+                            <br><small>Event: ${team.events?.name || 'Unknown'}</small>
+                            <br><small>User ID: ${team.user_id}</small>
+                            <br><small>Created: ${new Date(team.created_at).toLocaleDateString()}</small>
+                            ${!team.is_valid ? '<br><span class="invalid-badge">INVALID</span>' : ''}
+                            <br><span class="paid-status">Payment Status: <strong>${team.paid ? 'PAID' : 'UNPAID'}</strong></span>
+                        </div>
+                        <div class="team-actions">
+                            <button onclick="window.location.href='/edit-team/?id=${team.id}'" class="primary">Edit Team</button>
+                            <button onclick="togglePaidStatus(${team.id}, ${!team.paid})" class="${team.paid ? 'warning' : 'success'}">
+                                ${team.paid ? 'Mark Unpaid' : 'Mark Paid'}
+                            </button>
+                            <button onclick="deleteTeam(${team.id})" class="danger">Delete Team</button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch (error) {
+        showError('Error loading teams: ' + error.message);
+    }
+}
+
+async function togglePaidStatus(teamId, newPaidStatus) {
+    try {
+        const { error } = await supabase
+            .from('teams')
+            .update({ paid: newPaidStatus })
+            .eq('id', teamId);
+            
+        if (error) throw error;
+        
+        showSuccess(`Team payment status updated to ${newPaidStatus ? 'PAID' : 'UNPAID'}!`);
+        loadAllTeams();
+    } catch (error) {
+        showError('Error updating team payment status: ' + error.message);
+    }
+}
+
+async function deleteTeam(teamId) {
+    if (!confirm('Are you sure you want to delete this team?')) return;
+    
+    try {
+        const { error } = await supabase
+            .from('teams')
+            .delete()
+            .eq('id', teamId);
+            
+        if (error) throw error;
+        
+        showSuccess('Team deleted successfully!');
+        loadAllTeams();
+    } catch (error) {
+        showError('Error deleting team: ' + error.message);
+    }
+}
+
+async function loadUsers() {
+    try {
+        const { data: users, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .order('created_at', { ascending: false });
+            
+        if (error) throw error;
+        
+        const container = document.getElementById('usersContainer');
+        container.innerHTML = `
+            <div class="users-list">
+                ${users.map(user => `
+                    <div class="user-item">
+                        <div class="user-info">
+                            <div class="user-identity">
+                                <strong>${user.username || 'No username'}</strong>
+                                <div>${user.email || 'No email'}</div>
+                            </div>
+                            <div class="user-details">
+                                <div class="${user.is_admin ? 'admin-yes' : ''}">Admin: ${user.is_admin ? 'Yes' : 'No'}</div>
+                                <small>Joined: ${new Date(user.created_at).toLocaleDateString()}</small>
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            <button onclick="toggleAdmin('${user.id}', ${!user.is_admin})">
+                                ${user.is_admin ? 'Remove Admin' : 'Make Admin'}
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch (error) {
+        showError('Error loading users: ' + error.message);
+    }
+}
+
+async function toggleAdmin(userId, makeAdmin) {
+    try {
+        const { error } = await supabase
+            .from('profiles')
+            .update({ is_admin: makeAdmin })
+            .eq('id', userId);
+            
+        if (error) throw error;
+        
+        showSuccess(`User ${makeAdmin ? 'promoted to' : 'removed from'} admin successfully!`);
+        loadUsers();
+    } catch (error) {
+        showError('Error updating user: ' + error.message);
+    }
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('adminError');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    setTimeout(() => errorDiv.style.display = 'none', 5000);
+}
+
+async function loadEventDeadlines() {
+    try {
+        const { data: events, error } = await supabase
+            .from('event_deadline_status')
+            .select('*')
+            .order('start_date', { ascending: true });
+            
+        if (error) throw error;
+        
+        const container = document.getElementById('eventDeadlinesContainer');
+        container.innerHTML = `
+            <div class="events-deadline-list">
+                ${events.map(event => `
+                    <div class="event-deadline-item ${!event.teams_allowed ? 'deadline-passed' : 'deadline-open'}">
+                        <div class="event-deadline-info">
+                            <strong>${event.name}</strong>
+                            <div>Start Date: ${event.start_date ? event.start_date : 'Not set'}</div>
+                            <div>Team Deadline: ${event.team_deadline ? new Date(event.team_deadline).toLocaleString('en-US', {timeZoneName: 'short'}) : 'Not set'}</div>
+                            <div class="deadline-status ${event.teams_allowed ? 'status-open' : 'status-closed'}">${event.status}</div>
+                            ${event.hours_until_deadline !== null ? 
+                                `<div class="time-remaining">${event.hours_until_deadline > 0 ? 
+                                    `${Math.round(event.hours_until_deadline)} hours remaining` : 
+                                    `Deadline passed ${Math.abs(Math.round(event.hours_until_deadline))} hours ago`}</div>` : 
+                                ''}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch (error) {
+        showError('Error loading event deadlines: ' + error.message);
+    }
+}
+
+function showSuccess(message) {
+    const successDiv = document.getElementById('adminSuccess');
+    successDiv.textContent = message;
+    successDiv.style.display = 'block';
+    setTimeout(() => successDiv.style.display = 'none', 3000);
+}
+
+let currentEditingEventId = null;
+
+async function loadEventForDeadlineEdit() {
+    const eventId = document.getElementById('deadlineEventSelect').value;
+    if (!eventId) return;
+    
+    currentEditingEventId = eventId;
+    
+    try {
+        const { data: event, error } = await supabase
+            .from('events')
+            .select('name, team_deadline')
+            .eq('id', eventId)
+            .single();
+            
+        if (error) throw error;
+        
+        // Show the edit form
+        document.getElementById('deadlineEditContainer').style.display = 'block';
+        
+        // Update timezone display
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        document.getElementById('editTimezone').textContent = timezone;
+        
+        // Set the current deadline if exists
+        if (event.team_deadline) {
+            // Convert to local datetime-local format
+            const date = new Date(event.team_deadline);
+            const localDateTime = date.toISOString().slice(0, 16);
+            document.getElementById('editEventDeadline').value = localDateTime;
+        } else {
+            document.getElementById('editEventDeadline').value = '';
+        }
+        
+        // Set up form submission
+        document.getElementById('deadlineEditForm').onsubmit = updateEventDeadline;
+        
+    } catch (error) {
+        showError('Error loading event: ' + error.message);
+    }
+}
+
+async function updateEventDeadline(e) {
+    e.preventDefault();
+    
+    const deadlineInput = document.getElementById('editEventDeadline').value;
+    
+    try {
+        const { error } = await supabase
+            .from('events')
+            .update({ 
+                team_deadline: deadlineInput ? new Date(deadlineInput).toISOString() : null 
+            })
+            .eq('id', currentEditingEventId);
+            
+        if (error) throw error;
+        
+        showSuccess('Event deadline updated successfully!');
+        cancelDeadlineEdit();
+        loadEventsForSelects();
+        
+        // Refresh deadline status if it's visible
+        const deadlinesContainer = document.getElementById('eventDeadlinesContainer');
+        if (deadlinesContainer.querySelector('.events-deadline-list')) {
+            loadEventDeadlines();
+        }
+        
+    } catch (error) {
+        showError('Error updating deadline: ' + error.message);
+    }
+}
+
+async function clearDeadline() {
+    if (!confirm('Are you sure you want to clear the deadline? This will allow team operations indefinitely.')) return;
+    
+    try {
+        const { error } = await supabase
+            .from('events')
+            .update({ team_deadline: null })
+            .eq('id', currentEditingEventId);
+            
+        if (error) throw error;
+        
+        showSuccess('Event deadline cleared successfully!');
+        cancelDeadlineEdit();
+        loadEventsForSelects();
+        
+        // Refresh deadline status if it's visible
+        const deadlinesContainer = document.getElementById('eventDeadlinesContainer');
+        if (deadlinesContainer.querySelector('.events-deadline-list')) {
+            loadEventDeadlines();
+        }
+        
+    } catch (error) {
+        showError('Error clearing deadline: ' + error.message);
+    }
+}
+
+function cancelDeadlineEdit() {
+    document.getElementById('deadlineEditContainer').style.display = 'none';
+    document.getElementById('editEventDeadline').value = '';
+    currentEditingEventId = null;
+}
+</script>
+
+  </div>
+
+  <footer class="post-footer">
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="//localhost:1313/">Scrabble Roto</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

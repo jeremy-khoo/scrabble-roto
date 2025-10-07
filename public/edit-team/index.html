@@ -1,11 +1,660 @@
 <!DOCTYPE html>
-<html>
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
-  <title>Edit Team</title>
-  <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-  <h1>Edit Team</h1>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Edit Team | Scrabble Roto</title>
+<meta name="keywords" content="">
+<meta name="description" content="Edit Your Team
+
+
+  Loading team...
   
+    
+      Team Name:
+      
+    
+
+    
+      Event:
+      
+        Loading...
+      
+    
+
+    
+
+    
+    
+      Update Team
+      Cancel
+    
+  
+
+
+">
+<meta name="author" content="Scrabble Roto">
+<link rel="canonical" href="//localhost:1313/edit-team/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.ae3d277e69647c027e65dd7c785748f912a9be2d37da0061b9ff15a5d7fafb7b.css" integrity="sha256-rj0nfmlkfAJ&#43;Zd18eFdI&#43;RKpvi032gBhuf8Vpdf6&#43;3s=" rel="preload stylesheet" as="style">
+<link rel="icon" href="//localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="//localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="//localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="//localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="//localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="//localhost:1313/edit-team/index.xml">
+<link rel="alternate" hreflang="en" href="//localhost:1313/edit-team/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<link rel="stylesheet" href="/css/app.css">
+</head>
+
+<body class="list" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="/" accesskey="h" title="Scrabble Roto (Alt + H)">Scrabble Roto</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        
+        <ul id="menu">
+                <li id="menu-item-teams" class="auth-dependent">
+                    <a href="//localhost:1313/teams/" title="Teams">
+                        <span>Teams</span>
+                    </a>
+                </li>
+                <li id="menu-item-stats" class="auth-dependent">
+                    <a href="//localhost:1313/stats/" title="Stats">
+                        <span>Stats</span>
+                    </a>
+                </li>
+                <li id="menu-item-create-team" class="auth-dependent">
+                    <a href="//localhost:1313/create-team/" title="Create Team">
+                        <span>Create Team</span>
+                    </a>
+                </li>
+                <li id="menu-item-admin" class="auth-dependent">
+                    <a href="//localhost:1313/admin/" title="Admin">
+                        <span>Admin</span>
+                    </a>
+                </li>
+                <li id="menu-item-login" class="auth-dependent">
+                    <a href="//localhost:1313/login/" title="Login">
+                        <span>Login</span>
+                    </a>
+                </li>
+            </ul>
+
+        
+        <div class="user-info" id="authUserInfo" style="display: none;">
+            <span id="authUserDisplay"></span>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+
+        
+        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu">
+            ☰
+        </button>
+    </nav>
+</header>
+
+<script>
+
+function toggleMobileMenu() {
+    const menu = document.getElementById('menu');
+    menu.classList.toggle('mobile-open');
+}
+
+
+async function handleLogout() {
+    try {
+        if (typeof logout === 'function') {
+            await logout();
+        } else {
+            window.location.href = '/login/';
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        window.location.href = '/login/';
+    }
+}
+
+</script><main class="main"> 
+<header class="page-header">
+  <h1>
+    Edit Team
+  </h1>
+</header>
+<div class="post-content">
+<h1>Edit Your Team</h1>
+
+<div id="editTeamContainer">
+  <div id="loadingMessage">Loading team...</div>
+  <form id="editTeamForm" style="display: none;">
+    <div class="form-group">
+      <label for="teamName">Team Name:</label>
+      <input type="text" id="teamName" required />
+    </div>
+
+    <div class="form-group">
+      <label for="eventSelect">Event:</label>
+      <select id="eventSelect" disabled>
+        <option value="">Loading...</option>
+      </select>
+    </div>
+
+    <div id="playerSelections"></div>
+
+    <div id="teamError" class="error-message" style="display: none"></div>
+    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+      <button type="submit">Update Team</button>
+      <button type="button" onclick="window.location.href='/teams/'" class="secondary">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<script>
+let teamId = null;
+let originalTeam = null;
+
+document.addEventListener("DOMContentLoaded", async function () {
+  if (!(await requireAuth())) return;
+
+  // Get team ID from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  teamId = urlParams.get('id');
+  
+  if (!teamId) {
+    document.getElementById('editTeamContainer').innerHTML = '<p>No team ID specified. <a href="/teams/">Go back to teams</a></p>';
+    return;
+  }
+
+  await loadTeamForEditing();
+  document.getElementById("editTeamForm").addEventListener("submit", updateTeam);
+});
+
+async function loadTeamForEditing() {
+  try {
+    // Check admin status first
+    const { data: userProfile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", currentUser.id)
+      .single();
+    
+    const isAdmin = userProfile?.is_admin || false;
+    
+    // If not admin, check if user owns this team before loading full details
+    if (!isAdmin) {
+      const { data: teamOwnership, error: ownershipError } = await supabase
+        .from('teams')
+        .select('user_id')
+        .eq('id', teamId)
+        .single();
+      
+      if (ownershipError || !teamOwnership) {
+        throw new Error('Team not found.');
+      }
+      
+      if (teamOwnership.user_id !== currentUser.id) {
+        document.getElementById('editTeamContainer').innerHTML = `
+          <div class="error-message">
+            <h3>Access Denied</h3>
+            <p>You do not have permission to edit this team.</p>
+            <p><a href="/teams/">← Back to Teams</a></p>
+          </div>
+        `;
+        return;
+      }
+    }
+    
+    // Load the specific team with all details
+    // Admins can edit any team, regular users can only edit their own
+    let teamQuery = supabase
+      .from('teams')
+      .select(`
+        *,
+        events(id, name),
+        team_players(
+          *,
+          players(id, name, current_rating, dropped_out, current_rating_band_id, original_rating_band_id, is_active),
+          rating_bands!team_players_drafted_rating_band_id_fkey(id, name)
+        )
+      `)
+      .eq('id', teamId);
+    
+    // Only add user_id filter for non-admins
+    if (!isAdmin) {
+      teamQuery = teamQuery.eq('user_id', currentUser.id);
+    }
+    
+    const { data: team, error } = await teamQuery.single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        throw new Error('Team not found or you do not have permission to edit it.');
+      }
+      throw error;
+    }
+    
+    if (!isAdmin) {
+      const { data: eventStatus, error: statusError } = await supabase
+        .from("event_deadline_status")
+        .select("teams_allowed, status, team_deadline")
+        .eq("id", team.events.id)
+        .single();
+
+      if (statusError) {
+        throw new Error("Could not verify event status.");
+      }
+
+      if (!eventStatus.teams_allowed) {
+        document.getElementById('editTeamContainer').innerHTML = `
+          <div class="deadline-message error-message">
+            <h3>Team Editing Closed</h3>
+            <p>The deadline for editing teams for <strong>${team.events.name}</strong> has passed.</p>
+            <p><a href="/teams/">← Back to Teams</a></p>
+          </div>
+        `;
+        return;
+      }
+    }
+
+    originalTeam = team;
+    
+    // Populate form
+    document.getElementById('teamName').value = team.name;
+    document.getElementById('eventSelect').innerHTML = `<option value="${team.events.id}">${team.events.name}</option>`;
+    document.getElementById('eventSelect').value = team.events.id;
+
+    await loadRatingBandsForEdit(team.events.id, team.team_players);
+    
+    document.getElementById('loadingMessage').style.display = 'none';
+    document.getElementById('editTeamForm').style.display = 'block';
+    
+  } catch (error) {
+    console.error('Error loading team:', error);
+    document.getElementById('editTeamContainer').innerHTML = `<p>Error: ${error.message} <a href="/teams/">Go back to teams</a></p>`;
+  }
+}
+
+async function loadRatingBandsForEdit(eventId, currentTeamPlayers) {
+  try {
+    const { data: bands, error } = await supabase
+      .from("rating_bands")
+      .select("*")
+      .eq("event_id", eventId)
+      .order("id", { ascending: true });
+
+    if (error) throw error;
+
+    await createPlayerSelectionsForEdit(bands, eventId, currentTeamPlayers);
+  } catch (error) {
+    console.error("Error loading rating bands:", error);
+    showError("Error loading rating bands: " + error.message);
+  }
+}
+
+async function createPlayerSelectionsForEdit(bands, eventId, currentTeamPlayers) {
+  const container = document.getElementById("playerSelections");
+  container.innerHTML = "";
+
+  for (const band of bands) {
+    // Load ALL players for this band (including inactive/dropped ones for editing)
+    const { data: players, error } = await supabase
+      .from("players")
+      .select("*")
+      .eq("event_id", eventId)
+      .eq("current_rating_band_id", band.id)
+      .order("current_rating", { ascending: false });
+
+    if (error) {
+      console.error("Error loading players for band:", band.name, error);
+      continue;
+    }
+
+    // Find current selection for this band
+    const currentPlayer = currentTeamPlayers.find(tp => tp.rating_bands.id === band.id);
+
+    const div = document.createElement("div");
+    div.className = "rating-band-selection";
+    div.setAttribute("data-band-id", band.id);
+    
+    let playerOptions = '<option value="">Select a player...</option>';
+    
+    // Add active players first
+    const activePlayers = players.filter(p => p.is_active && !p.dropped_out);
+    activePlayers.forEach(player => {
+      const selected = currentPlayer && currentPlayer.players.id === player.id ? 'selected' : '';
+      playerOptions += `<option value="${player.id}" ${selected}>${player.name} (${player.current_rating})</option>`;
+    });
+    
+    // Add inactive/dropped players (for teams that have them)
+    const inactivePlayers = players.filter(p => !p.is_active || p.dropped_out);
+    if (inactivePlayers.length > 0) {
+      playerOptions += '<optgroup label="Inactive/Dropped Players">';
+      inactivePlayers.forEach(player => {
+        const selected = currentPlayer && currentPlayer.players.id === player.id ? 'selected' : '';
+        const status = player.dropped_out ? ' - DROPPED' : ' - INACTIVE';
+        playerOptions += `<option value="${player.id}" ${selected}>${player.name} (${player.current_rating})${status}</option>`;
+      });
+      playerOptions += '</optgroup>';
+    }
+
+    div.innerHTML = `
+      <h3>${band.name}</h3>
+      <select name="player-${band.id}" required>
+        ${playerOptions}
+      </select>
+    `;
+
+    // Add change listener for visual feedback
+    const select = div.querySelector("select");
+    select.addEventListener("change", function () {
+      updateBandStatus(div, this.value);
+      updateSubmitButton();
+    });
+
+    // Set initial status
+    updateBandStatus(div, select.value);
+
+    container.appendChild(div);
+  }
+
+  updateSubmitButton();
+}
+
+function updateBandStatus(bandDiv, selectedValue) {
+  if (selectedValue) {
+    bandDiv.classList.remove("invalid");
+    bandDiv.classList.add("completed");
+  } else {
+    bandDiv.classList.remove("completed");
+    bandDiv.classList.remove("invalid");
+  }
+}
+
+function updateSubmitButton() {
+  const submitButton = document.querySelector('button[type="submit"]');
+  const allSelects = document.querySelectorAll(".rating-band-selection select");
+  const allSelected = Array.from(allSelects).every(select => select.value !== "");
+
+  if (allSelected && allSelects.length > 0) {
+    submitButton.disabled = false;
+    submitButton.textContent = "Update Team";
+    submitButton.style.opacity = "1";
+  } else {
+    submitButton.disabled = true;
+    submitButton.textContent = "Please select all players";
+    submitButton.style.opacity = "0.6";
+  }
+}
+
+async function updateTeam(e) {
+  e.preventDefault();
+
+  const teamName = document.getElementById("teamName").value;
+  const errorDiv = document.getElementById("teamError");
+  const submitButton = e.target.querySelector('button[type="submit"]');
+
+  // Hide previous errors
+  errorDiv.style.display = "none";
+
+  // Collect selected players and validate
+  const playerSelects = document.querySelectorAll('select[name^="player-"]');
+  const selectedPlayers = [];
+  let hasInvalidSelections = false;
+
+  for (const select of playerSelects) {
+    const bandDiv = select.closest(".rating-band-selection");
+
+    if (!select.value) {
+      bandDiv.classList.add("invalid");
+      hasInvalidSelections = true;
+    } else {
+      bandDiv.classList.remove("invalid");
+      const bandId = select.name.split("-")[1];
+
+      selectedPlayers.push({
+        playerId: parseInt(select.value),
+        ratingBandId: parseInt(bandId),
+      });
+    }
+  }
+
+  if (hasInvalidSelections) {
+    errorDiv.textContent = "Please select a player for each rating band";
+    errorDiv.style.display = "block";
+    errorDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+
+  submitButton.disabled = true;
+  submitButton.textContent = "Updating team...";
+
+  try {
+    // Double-check deadline before updating (skip for admins)
+    const { data: userProfile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", currentUser.id)
+      .single();
+    
+    const isAdmin = userProfile?.is_admin || false;
+    
+    if (!isAdmin) {
+      const { data: eventStatus, error: statusError } = await supabase
+        .from("event_deadline_status")
+        .select("teams_allowed, status")
+        .eq("id", originalTeam.events.id)
+        .single();
+
+      if (statusError) {
+        throw new Error("Could not verify event status.");
+      }
+
+      if (!eventStatus.teams_allowed) {
+        throw new Error("Team editing deadline has passed. Changes cannot be saved.");
+      }
+    }
+
+    // Update team name and reset validity (since UI only allows valid selections)
+    const { error: teamError } = await supabase
+      .from("teams")
+      .update({ name: teamName, is_valid: true })
+      .eq("id", teamId);
+
+    if (teamError) {
+      // Handle unique constraint violation
+      if (teamError.code === "23505" && teamError.message.includes("teams_event_id_name_key")) {
+        throw new Error(`A team named "${teamName}" already exists for this event. Please choose a different name.`);
+      }
+      throw teamError;
+    }
+
+    // Delete existing team players
+    const { error: deleteError } = await supabase
+      .from("team_players")
+      .delete()
+      .eq("team_id", teamId);
+
+    if (deleteError) throw deleteError;
+
+    // Add new players to team
+    const teamPlayers = selectedPlayers.map((sp) => ({
+      team_id: teamId,
+      player_id: sp.playerId,
+      rating_band_id: sp.ratingBandId,
+    }));
+
+    const { error: playersError } = await supabase
+      .from("team_players")
+      .insert(teamPlayers);
+
+    if (playersError) throw playersError;
+
+    alert("Team updated successfully!");
+    window.location.href = "/teams/";
+  } catch (error) {
+    console.error("Error updating team:", error);
+    errorDiv.textContent = error.message;
+    errorDiv.style.display = "block";
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Update Team";
+  }
+}
+
+function showError(message) {
+  const errorDiv = document.getElementById("teamError");
+  errorDiv.textContent = message;
+  errorDiv.style.display = "block";
+}
+</script>
+
+</div>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="//localhost:1313/">Scrabble Roto</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
 </body>
+
 </html>

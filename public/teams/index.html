@@ -1,11 +1,467 @@
 <!DOCTYPE html>
-<html>
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
-  <title>Teams</title>
-  <link rel="stylesheet" href="/css/styles.css">
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Teams | Scrabble Roto</title>
+<meta name="keywords" content="">
+<meta name="description" content="Team Standings
+
+    Teams ranked by total wins, then by total spread. Last updated: Loading...
+
+
+    Loading teams...
+
+Note: There are some technical difficulties with the Nationals scoreboard data. The standings below are not yet accurate. Please sit tight.
+">
+<meta name="author" content="Scrabble Roto">
+<link rel="canonical" href="//localhost:1313/teams/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.ae3d277e69647c027e65dd7c785748f912a9be2d37da0061b9ff15a5d7fafb7b.css" integrity="sha256-rj0nfmlkfAJ&#43;Zd18eFdI&#43;RKpvi032gBhuf8Vpdf6&#43;3s=" rel="preload stylesheet" as="style">
+<link rel="icon" href="//localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="//localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="//localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="//localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="//localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="//localhost:1313/teams/index.xml">
+<link rel="alternate" hreflang="en" href="//localhost:1313/teams/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="/js/supabase-client.js"></script>
+<link rel="stylesheet" href="/css/app.css">
 </head>
-<body>
-  <h1>Teams</h1>
-  
+
+<body class="list" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="/" accesskey="h" title="Scrabble Roto (Alt + H)">Scrabble Roto</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        
+        <ul id="menu">
+                <li id="menu-item-teams" class="auth-dependent">
+                    <a href="//localhost:1313/teams/" title="Teams">
+                        <span class="active">Teams</span>
+                    </a>
+                </li>
+                <li id="menu-item-stats" class="auth-dependent">
+                    <a href="//localhost:1313/stats/" title="Stats">
+                        <span>Stats</span>
+                    </a>
+                </li>
+                <li id="menu-item-create-team" class="auth-dependent">
+                    <a href="//localhost:1313/create-team/" title="Create Team">
+                        <span>Create Team</span>
+                    </a>
+                </li>
+                <li id="menu-item-admin" class="auth-dependent">
+                    <a href="//localhost:1313/admin/" title="Admin">
+                        <span>Admin</span>
+                    </a>
+                </li>
+                <li id="menu-item-login" class="auth-dependent">
+                    <a href="//localhost:1313/login/" title="Login">
+                        <span>Login</span>
+                    </a>
+                </li>
+            </ul>
+
+        
+        <div class="user-info" id="authUserInfo" style="display: none;">
+            <span id="authUserDisplay"></span>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+
+        
+        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu">
+            ☰
+        </button>
+    </nav>
+</header>
+
+<script>
+
+function toggleMobileMenu() {
+    const menu = document.getElementById('menu');
+    menu.classList.toggle('mobile-open');
+}
+
+
+async function handleLogout() {
+    try {
+        if (typeof logout === 'function') {
+            await logout();
+        } else {
+            window.location.href = '/login/';
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        window.location.href = '/login/';
+    }
+}
+
+</script><main class="main"> 
+<header class="page-header">
+  <h1>
+    Teams
+  </h1>
+</header>
+<div class="post-content"><h1 id="team-standings">Team Standings<a hidden class="anchor" aria-hidden="true" href="#team-standings">#</a></h1>
+<div class="standings-info">
+    <p>Teams ranked by total wins, then by total spread. Last updated: <span id="lastUpdate">Loading...</span></p>
+</div>
+<div id="teamsContainer">
+    <p>Loading teams...</p>
+</div>
+<p>Note: There are some technical difficulties with the Nationals scoreboard data. The standings below are not yet accurate. Please sit tight.</p>
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    // Load teams with standings data
+    try {
+        const { data: teams, error } = await supabase
+            .from('teams')
+            .select(`
+                *,
+                events(name),
+                team_players(
+                    drafted_rating_band_id, drafted_division,
+                    players(name, current_rating, dropped_out, current_rating_band_id, current_division, tournament_wins, tournament_spread),
+                    rating_bands!team_players_drafted_rating_band_id_fkey(name)
+                )
+            `)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Get standings data for all teams
+        const { data: standings, error: standingsError } = await supabase
+            .from('team_standings')
+            .select('*');
+
+        if (standingsError) throw standingsError;
+
+        // Merge standings data with team data
+        teams.forEach(team => {
+            const teamStandings = standings.find(s => s.id === team.id);
+            if (teamStandings) {
+                team.total_wins = teamStandings.total_wins;
+                team.total_losses = teamStandings.total_losses;
+                team.total_spread = teamStandings.total_spread;
+                team.total_games = teamStandings.total_games;
+                team.newest_update = teamStandings.newest_update;
+            } else {
+                team.total_wins = 0;
+                team.total_losses = 0;
+                team.total_spread = 0;
+                team.total_games = 0;
+            }
+        });
+
+        // Sort by standings (wins desc, spread desc)
+        teams.sort((a, b) => {
+            if (b.total_wins !== a.total_wins) {
+                return b.total_wins - a.total_wins;
+            }
+            return b.total_spread - a.total_spread;
+        });
+
+        // Get usernames for team creators
+        const userIds = [...new Set(teams.map(team => team.user_id))];
+        const { data: usernames } = await supabase
+            .from('public_profiles')
+            .select('id, username')
+            .in('id', userIds);
+
+        // Add usernames to teams
+        teams.forEach(team => {
+            const user = usernames?.find(u => u.id === team.user_id);
+            team.creator_username = user?.username || 'Unknown';
+        });
+
+        // Update last update time
+        updateLastUpdateTime(teams);
+
+        displayTeams(teams);
+    } catch (error) {
+        console.error('Error loading teams:', error);
+        document.getElementById('teamsContainer').innerHTML = '<p>Error loading teams</p>';
+    }
+});
+
+function updateLastUpdateTime(teams) {
+    const lastUpdateElement = document.getElementById('lastUpdate');
+
+    // Find the most recent update time across all teams
+    let mostRecentUpdate = null;
+    teams.forEach(team => {
+        if (team.newest_update) {
+            const updateTime = new Date(team.newest_update);
+            if (!mostRecentUpdate || updateTime > mostRecentUpdate) {
+                mostRecentUpdate = updateTime;
+            }
+        }
+    });
+
+    if (mostRecentUpdate) {
+        lastUpdateElement.textContent = mostRecentUpdate.toLocaleString();
+    } else {
+        lastUpdateElement.textContent = 'No standings data yet';
+    }
+}
+
+function displayTeams(teams) {
+    const container = document.getElementById('teamsContainer');
+
+    if (!teams || teams.length === 0) {
+        container.innerHTML = '<p>No teams created yet. <a href="/create-team/">Create the first team!</a></p>';
+        return;
+    }
+
+    // Show all teams in standings order (no separation by user)
+    let html = '<div class="teams-standings">';
+
+    teams.forEach((team, index) => {
+        const isOwner = currentUser && team.user_id === currentUser.id;
+        const rank = index + 1;
+        html += generateTeamCardWithStandings(team, isOwner, rank);
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function generateTeamCardWithStandings(team, isOwner, rank) {
+    const playersList = team.team_players.map(tp => {
+        const player = tp.players;
+        const isInvalid = player.dropped_out || player.current_rating_band_id !== tp.drafted_rating_band_id || player.current_division !== tp.drafted_division;
+        const invalidClass = isInvalid ? ' class="invalid-player"' : '';
+
+        // Get the invalid reason
+        let invalidReason = '';
+        if (player.dropped_out) {
+            invalidReason = 'Player dropped out';
+        } else if (player.current_division !== tp.drafted_division) {
+            invalidReason = 'Player changed divisions';
+        } else if (player.current_rating_band_id !== tp.drafted_rating_band_id) {
+            invalidReason = `Player moved from drafted rating band (now ${player.current_rating})`;
+        }
+
+        const invalidTitle = invalidReason ? ` title="${invalidReason}"` : '';
+
+        // Format tournament record: wins and spread
+        const wins = player.tournament_wins || 0;
+        const spread = player.tournament_spread || 0;
+        const spreadStr = spread >= 0 ? `+${spread}` : `${spread}`;
+        const record = `${wins} ${spreadStr}`;
+
+        // Add an indicator for invalid players
+        const invalidIndicator = isInvalid ? '<span class="invalid-indicator" title="' + invalidReason + '">⚠️</span>' : '';
+
+        return `<tr${invalidClass}${invalidTitle}>
+            <td><strong>${player.name}</strong>${invalidIndicator}</td>
+            <td class="player-division">${tp.rating_bands.name}</td>
+            <td class="player-record">${record}</td>
+        </tr>`;
+    }).join('');
+
+    const validityBadge = !team.is_valid ?
+        '<span class="badge invalid">Invalid</span>' : '';
+
+    const paidBadge = team.paid ?
+        '<span class="badge paid">Paid</span>' :
+        '<span class="badge tentative">Tentative</span>';
+
+    const editButton = isOwner ?
+        `<button onclick="window.location.href='/edit-team/?id=${team.id}'" class="edit-btn">Edit</button>` : '';
+
+    // Format standings with proper +/- for spread
+    const winsDisplay = team.total_wins || 0;
+    const lossesDisplay = team.total_losses || 0;
+    const spreadDisplay = team.total_spread >= 0 ? `+${team.total_spread}` : `${team.total_spread}`;
+
+    return `
+        <div class="team-card compact ${isOwner ? 'own-team' : ''}">
+            <div class="team-header">
+                <h3>${team.name}</h3>
+                <div class="team-badges">
+                    ${validityBadge}
+                    ${paidBadge}
+                </div>
+            </div>
+            <div class="team-info">
+                <div class="team-meta">
+                    <span><strong>By:</strong> ${team.creator_username}</span>
+                    <span><strong>Event:</strong> ${team.events?.name || 'Unknown'}</span>
+                    <span><small>Created: ${new Date(team.created_at).toLocaleDateString()}</small></span>
+                </div>
+                <div class="team-players">
+                    <strong>Players:</strong>
+                    <table class="players-table">
+                        <tbody>
+                            ${playersList}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="team-tournament-standings">
+                    <div class="standings-header">
+                        <strong>Tournament Standings:</strong>
+                    </div>
+                    <div class="standings-stats">
+                        <span class="wins"><strong>${winsDisplay}</strong> wins</span>
+                        <span class="spread">Spread: <strong>${spreadDisplay}</strong></span>
+                    </div>
+                </div>
+                ${editButton ? `<div class="team-actions">${editButton}</div>` : ''}
+            </div>
+        </div>
+    `;
+}
+</script>
+
+
+</div>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="//localhost:1313/">Scrabble Roto</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
 </body>
+
 </html>
