@@ -6,10 +6,10 @@ import { createClient } from "@supabase/supabase-js";
 // Configuration - these should be set as environment variables in production
 const TOURNAMENT_CONFIGS = [
   {
-    baseUrl: "https://event.scrabbleplayers.org/2025/spc/build/tsh/2025-spc-",
-    divisions: ["a", "b"],
+    baseUrl: "https://bkkcrossword.com/tsh/ToAutoCar2025/",
+    divisions: ["opw"],
     name: "main",
-    urlPattern: "{baseUrl}{division}/html/tourney.js", // Standard pattern
+    urlPattern: "{baseUrl}{division}/tourney.js", // Standard pattern
   },
 ];
 const EVENT_ID = 1; // Adjust this to match your event ID

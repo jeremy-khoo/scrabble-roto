@@ -4,6 +4,8 @@ title: "Scrabble Roto"
 
 # Welcome to Scrabble Roto
 
+**LIVE UPDATES ARE NOT WORKING, I HOPE TO FIX THE ISSUE AFTER DAY 1**
+
 Create your Scrabble Roto team for the 2025 TO Autocar Bangkok International here!
 (This roto is not organized or endorsed by the Bangkok Crossword Club.)
 
@@ -18,6 +20,7 @@ Create your Scrabble Roto team for the 2025 TO Autocar Bangkok International her
 ## Rules
 - Teams will be ranked by total wins and then total spread will be used as the tiebreaker.
 - During the tournament, team standings will be updated as results become available.
+- Any no-shows who are picked and not replaced before the deadline will automatically be replaced by the highest-rated player in the bracket.
 
 ## Prizes
 
