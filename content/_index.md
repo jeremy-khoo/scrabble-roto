@@ -4,7 +4,7 @@ title: "Scrabble Roto"
 
 # Welcome to Scrabble Roto
 
-**LIVE UPDATES ARE NOT WORKING, I HOPE TO FIX THE ISSUE AFTER DAY 1**
+**LIVE UPDATES SHOULD BE WORKING BUT SPREADS MAY NOT BE FULLY ACCURATE**
 
 Create your Scrabble Roto team for the 2025 TO Autocar Bangkok International here!
 (This roto is not organized or endorsed by the Bangkok Crossword Club.)
@@ -24,26 +24,13 @@ Create your Scrabble Roto team for the 2025 TO Autocar Bangkok International her
 
 ## Prizes
 
-TBA. All entry fees will be returned as prizes.
-
-Sample prize distribution with 20 teams:
-
 | Place | Prize |
 |-------|-------|
-| 1st   | ฿3000 |
-| 2nd   | ฿2500 |
-| 3rd   | ฿2000 |
-| 4th   | ฿1500 |
-| 5th   | ฿1000 |
-
-More prizes (6th, 7th, etc.) will be added if there are more than 20 teams. There may also be some sponsored prizes (TBC).
-
-<!--
-| 6th   | $85   |
-| 7th   | $65   |
-| 8th   | $40   |
-| 9th   | $20   |
--->
+| 1st   | ฿2500 |
+| 2nd   | ฿2000 |
+| 3rd   | ฿1500 |
+| 4th   | ฿1000 |
+| 5th   | ฿500  |
 
 ## Getting Started
 Click **Teams** to see existing teams or **Create Team** to build your own fantasy roster.
